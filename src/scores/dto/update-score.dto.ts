@@ -1,26 +1,21 @@
 import { Expose, Type } from 'class-transformer';
-import { IsInt, IsPositive, Max, Min, ValidateIf } from 'class-validator';
+import { IsMongoId, Max, Min, ValidateIf } from 'class-validator';
+import { ObjectId } from 'mongodb';
 
 export class UpdateScoreDto {
   @ValidateIf((o) => o.id || !o.subject || !o.student)
-  @IsPositive()
-  @IsInt()
-  @Type(() => Number)
-  readonly id?: number;
+  @IsMongoId()
+  readonly _id?: string | ObjectId;
 
   @Expose({ name: 'studentId' })
   @ValidateIf((o) => !o.id || (o.subject && o.student))
-  @IsPositive()
-  @IsInt()
-  @Type(() => Number)
-  readonly student?: number;
+  @IsMongoId()
+  readonly student?: string | ObjectId;
 
   @Expose({ name: 'subjectId' })
   @ValidateIf((o) => !o.id || (o.subject && o.student))
-  @IsPositive()
-  @IsInt()
-  @Type(() => Number)
-  readonly subject?: number;
+  @IsMongoId()
+  readonly subject?: string | ObjectId;
 
   @Min(1)
   @Max(10)

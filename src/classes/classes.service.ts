@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Like as ILike, ObjectLiteral, Raw, Repository } from 'typeorm';
-import { Class } from './class.entity';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Expression, Operators } from '../modules/expression.collection';
+import { Class, ClassDocument } from './class.entity';
 import {
   CheckExistClassDto,
   CreateClassDto,
@@ -13,24 +14,24 @@ import {
 @Injectable()
 export class ClassesService {
   constructor(
-    @InjectRepository(Class)
-    private readonly classesRepository: Repository<Class>,
+    @InjectModel(Class.name)
+    private readonly classesModel: Model<ClassDocument>,
   ) {}
 
   async create(createClassDto: CreateClassDto) {
-    return this.classesRepository.insert(createClassDto);
+    return this.classesModel.insertMany(createClassDto);
   }
 
-  async update({ id, ...classProps }: UpdateClassDto) {
-    return this.classesRepository.update({ id }, classProps);
+  async update({ _id, ...classProps }: UpdateClassDto) {
+    return this.classesModel.updateOne({ _id }, classProps).exec();
   }
 
-  async delete({ id }: DeleteClassDto) {
-    return this.classesRepository.delete({ id });
+  async delete({ _id }: DeleteClassDto) {
+    return this.classesModel.deleteOne({ _id }).exec();
   }
 
   async search({
-    id,
+    _id,
     name,
     totalMember,
     teacherName,
@@ -39,53 +40,57 @@ export class ClassesService {
     page,
   }: SearchClassDto) {
     //Nếu có trường id, trả về 1 kết quả dựa trên id
-    if (id) return this.classesRepository.findOne(id);
+    if (_id) return;
+    await this.classesModel.findOne({ _id }).exec();
 
-    //Nếu không có trường id, tạo queryBuilder
-    let queryBuilder = this.classesRepository.createQueryBuilder();
+    const conditions = [];
+
+    if (name) conditions.push({ name: { $regex: `.*${name}.*` } });
+
+    if (teacherName)
+      conditions.push({
+        teacherName: { $regex: `.*${teacherName}.*` },
+      });
+
+    if (totalMember)
+      conditions.push({
+        totalMember: this._totalMemberSearchRaw(totalMember),
+      });
+
+    let query = this.classesModel.find();
+
+    if (operator === 'AND') query = query.and(conditions);
+    if (operator === 'OR') query = query.or(conditions);
 
     //Thực hiện nhảy tới trang cần get dựa trên page và itemsPerPage
-    queryBuilder = queryBuilder
-      .skip((page - 1) * itemsPerPage)
-      .take(itemsPerPage);
+    query = query.skip((page - 1) * itemsPerPage).limit(itemsPerPage);
 
-    //Nếu là toán tử AND
-    if (operator === 'AND')
-      //Nếu một thuộc tính có value là undefined thì typeorm có bỏ qua nó không?
-      queryBuilder = queryBuilder.where({
-        name: name && ILike(`%${name}%`),
-        teacherName: teacherName && ILike(`%${teacherName}%`),
-        totalMember: totalMember && this._totalMemberSearchRaw(totalMember),
-      } as ObjectLiteral);
-
-    //Nếu là toán tử OR
-    if (operator === 'OR')
-      //Nếu một thuộc tính có value là undefined thì typeorm có bỏ qua nó không?
-      queryBuilder = queryBuilder.where([
-        { name: name && ILike(`%${name}%`) },
-        { teacherName: teacherName && ILike(`%${teacherName}%`) },
-        { totalMember: totalMember && this._totalMemberSearchRaw(totalMember) },
-      ] as ObjectLiteral[]);
-
-    return queryBuilder.getMany();
+    return query.lean().exec();
   }
 
-  async checkExist(checkExistClassDto: CheckExistClassDto) {
+  async checkExist({ _id, ...checkExistClassDto }: CheckExistClassDto) {
     return Boolean(
-      await this.classesRepository.findOne({ where: checkExistClassDto }),
+      await this.classesModel.exists(_id ? { _id } : checkExistClassDto).exec(),
     );
   }
 
   //Hàm xử lý biểu thức của tham số totalMember thành giá trị hợp lệ khi thực hiện tìm kiếm
-  private _totalMemberSearchRaw(
-    totalMember: string | [string, 'AND' | 'OR', string],
-  ) {
-    if (typeof totalMember === 'string')
-      return Raw((alias) => alias + totalMember);
-    else
-      return Raw(
-        (alias) =>
-          `${alias}${totalMember[0]} ${totalMember[1]} ${alias}${totalMember[2]}`,
-      );
+  private _totalMemberSearchRaw(totalMember: Expression) {
+    if (typeof totalMember === 'string') return +totalMember;
+
+    const op1 = `$${(Operators[totalMember[0]] as string).toLocaleLowerCase()}`;
+
+    if (totalMember.length === 2) {
+      return {
+        [op1]: +totalMember[1],
+      };
+    }
+
+    const op2 = `$${(Operators[totalMember[3]] as string).toLocaleLowerCase()}`;
+    const bitwise = `$${totalMember[2].toLocaleLowerCase()}`;
+
+    return {
+      [bitwise]: [{ [op1]: totalMember[1] }, { [op2]: totalMember[4] }],
+    };
   }
 }

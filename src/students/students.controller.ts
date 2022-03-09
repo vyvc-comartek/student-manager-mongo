@@ -35,11 +35,11 @@ export class StudentsController {
 
   @Post()
   async create(@Body() createStudentDto: CreateStudentDto) {
-    const isClassExist = !(await this.classesService.checkExist({
-      id: createStudentDto.class,
-    }));
+    const isClassExist = await this.classesService.checkExist({
+      _id: createStudentDto.class,
+    });
 
-    if (isClassExist)
+    if (!isClassExist)
       HttpExceptionMapper.throw(DatabaseExceptions.REFERENCE_OBJ_NOT_EXIST);
 
     return this.studentsService.create(createStudentDto);
@@ -49,7 +49,7 @@ export class StudentsController {
   async update(@Body() updateStudentDto: UpdateStudentDto) {
     const isClassNotExist =
       updateStudentDto.class &&
-      !(await this.classesService.checkExist({ id: updateStudentDto.class }));
+      !(await this.classesService.checkExist({ _id: updateStudentDto.class }));
 
     if (isClassNotExist)
       HttpExceptionMapper.throw(DatabaseExceptions.REFERENCE_OBJ_NOT_EXIST);
@@ -60,7 +60,7 @@ export class StudentsController {
   @Delete()
   async delete(@Body() deleteStudentDto: DeleteStudentDto) {
     const isScoreExist = await this.scoresService.checkExist({
-      student: deleteStudentDto.id,
+      student: deleteStudentDto._id,
     });
 
     if (isScoreExist)

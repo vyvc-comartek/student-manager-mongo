@@ -39,10 +39,10 @@ export class ScoresController {
   @Post()
   async create(@Body() createScoreDto: CreateScoreDto) {
     const isStudentExist = await this.studentsService.checkExist({
-      id: createScoreDto.student,
+      _id: createScoreDto.student,
     });
     const isSubjectExist = await this.subjectsService.checkExist({
-      id: createScoreDto.subject,
+      _id: createScoreDto.subject,
     });
 
     if (!isStudentExist || !isSubjectExist)
@@ -52,12 +52,20 @@ export class ScoresController {
       //Thực thi đồng thời truy vấn Score vừa tạo và đọc file xlsx schema
       const [score, schema, schemaAll, countSubjects] = await Promise.all([
         this.scoresService.search({
-          id: value.raw.insertId,
-          relations: [
-            'student',
-            'subject',
-            'student.scores',
-            'student.scores.subject',
+          insertedId: value[0]._id,
+          populates: [
+            {
+              path: 'student',
+              populate: [
+                {
+                  path: 'scores',
+                  populate: {
+                    path: 'subject',
+                  },
+                },
+              ],
+            },
+            { path: 'subject' },
           ],
         }),
         readFile('./xlsx-template/attch-email.xlsx'),
@@ -98,12 +106,12 @@ export class ScoresController {
     const isStudentNotExist =
       updateScoreDto.student &&
       !(await this.studentsService.checkExist({
-        id: updateScoreDto.student,
+        _id: updateScoreDto.student,
       }));
     const isSubjectNotExist =
       updateScoreDto.subject &&
       !(await this.subjectsService.checkExist({
-        id: updateScoreDto.subject,
+        _id: updateScoreDto.subject,
       }));
 
     if (isStudentNotExist || isSubjectNotExist)
@@ -117,12 +125,12 @@ export class ScoresController {
     const isStudentExist =
       deleteScoreDto.student &&
       (await this.studentsService.checkExist({
-        id: deleteScoreDto.student,
+        _id: deleteScoreDto.student,
       }));
     const isSubjectExist =
       deleteScoreDto.subject &&
       (await this.subjectsService.checkExist({
-        id: deleteScoreDto.subject,
+        _id: deleteScoreDto.subject,
       }));
 
     if (isStudentExist || isSubjectExist)
@@ -133,15 +141,10 @@ export class ScoresController {
 
   @Get()
   async search(@Query() searchScoreDto: SearchScoreDto) {
-    return this.scoresService.search(
-      Object.assign(searchScoreDto, {
-        relations: [
-          'student',
-          'subject',
-          'student.scores',
-          'student.scores.subject',
-        ],
-      } as SearchScoreDto),
-    );
+    const result = await this.scoresService.search({
+      ...searchScoreDto,
+    });
+    console.log(result.student.scores);
+    return result;
   }
 }

@@ -1,11 +1,9 @@
-import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsPositive, Length } from 'class-validator';
+import { IsMongoId, IsOptional, Length } from 'class-validator';
+import { ObjectId } from 'mongodb';
 
 export class UpdateClassDto {
-  @IsPositive()
-  @IsInt()
-  @Type(() => Number)
-  readonly id: number;
+  @IsMongoId()
+  readonly _id: string | ObjectId;
 
   @Length(3, 60)
   @IsOptional()

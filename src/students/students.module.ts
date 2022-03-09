@@ -4,18 +4,21 @@ import {
   Module,
   NestModule,
 } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
 import { ScoreModule } from 'src/scores/scores.module';
-import { Class } from '../classes/class.entity';
+import { Class, ClassSchema } from '../classes/class.entity';
 import { ClassModule } from '../classes/classes.module';
 import { ExcelModule } from '../modules/excel/excel.module';
-import { Student } from './student.entity';
+import { Student, StudentSchema } from './student.entity';
 import { StudentsController } from './students.controller';
 import { StudentsService } from './students.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Student, Class]),
+    MongooseModule.forFeature([
+      { name: Student.name, schema: StudentSchema },
+      { name: Class.name, schema: ClassSchema },
+    ]),
     forwardRef(() => ScoreModule),
     forwardRef(() => ClassModule),
     forwardRef(() => ExcelModule),

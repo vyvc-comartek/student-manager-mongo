@@ -1,10 +1,9 @@
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { TransportType } from '@nestjs-modules/mailer/dist/interfaces/mailer-options.interface';
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ClassModule } from './classes/classes.module';
@@ -16,20 +15,15 @@ import { SubjectModule } from './subjects/subjects.module';
   imports: [
     ConfigModule.forRoot(),
 
-    TypeOrmModule.forRootAsync({
+    MongooseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
 
       useFactory: async (configService: ConfigService) => ({
-        type: 'mysql',
-        host: configService.get<string>('DB_HOST'),
-        port: parseInt(configService.get<string>('DB_PORT')),
-        username: configService.get<string>('DB_USERNAME'),
-        password: configService.get<string>('DB_PASSWORD'),
-        database: configService.get<string>('DB_DATABASE'),
-        entities: ['dist/**/*.entity{.ts,.js}'],
-        synchronize: true,
-        autoLoadEntities: true,
+        uri: configService.get<string>('MONGO_URL'),
+        ssl: true,
+        useUnifiedTopology: true,
+        useNewUrlParser: true,
       }),
     }),
 
@@ -71,6 +65,6 @@ import { SubjectModule } from './subjects/subjects.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {
-  constructor(private readonly connection: Connection) {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {}
 }

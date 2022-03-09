@@ -1,48 +1,43 @@
-import { Class } from 'src/classes/class.entity';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Type } from 'class-transformer';
+import mongoose from 'mongoose';
+import { Class } from '../classes/class.entity';
 import { Score } from '../scores/score.entity';
 
-@Entity()
+@Schema({ timestamps: true, id: true, toObject: { virtuals: true } })
 export class Student {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column({ nullable: false, length: 60 })
+  @Prop({ type: String, required: true, maxLength: 60 })
   name: string;
 
-  @Column({ nullable: false })
+  @Prop({ type: Date, required: true })
   dob: Date;
 
-  @Column('enum', {
-    nullable: false,
-    enum: ['Male', 'Female', 'Other'],
+  @Prop({
+    type: String,
+    enum: { values: ['Male', 'Female', 'Other'] },
     default: 'Male',
   })
   gender: 'Male' | 'Female' | 'Other';
 
-  @Column({ nullable: false, length: 128 })
+  @Prop({ type: String, required: true, maxLength: 128 })
   email: string;
 
-  @ManyToOne(() => Class, (_class) => _class.students, {
-    onDelete: 'RESTRICT',
-  })
-  @JoinColumn({ name: 'classId' })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Class' })
+  @Type(() => Class)
   class: Class;
 
-  @OneToMany(() => Score, (_score) => _score.student)
+  @Type(() => Score)
   scores: Score[];
-
-  public get scoreAvg() {
-    return this.scores
-      ? this.scores.reduce((result, { score }) => result + score, 0) /
-          this.scores.length
-      : 0;
-  }
 }
+
+export type StudentDocument = Student & Document;
+
+const StudentSchema = SchemaFactory.createForClass(Student);
+
+StudentSchema.virtual('scores', {
+  ref: 'Score',
+  localField: 'student',
+  foreignField: 'students',
+});
+
+export { StudentSchema };

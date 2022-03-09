@@ -1,31 +1,28 @@
-import { Expose, Transform, Type } from 'class-transformer';
+import { Expose, Transform } from 'class-transformer';
 import {
   IsEnum,
-  IsInt,
+  IsMongoId,
   IsOptional,
-  IsPositive,
   Length,
   matches,
 } from 'class-validator';
+import { ObjectId } from 'mongodb';
 import { PaginationDto } from 'src/modules/pagination.dto';
+import { Expression } from '../../modules/expression.collection';
 
 export class SearchStudentDto extends PaginationDto {
-  @IsPositive()
-  @IsInt()
   @IsOptional()
-  @Type(() => Number)
-  readonly id?: number;
+  @IsMongoId()
+  readonly _id?: string | ObjectId;
 
   @Length(1, 60)
   @IsOptional()
   readonly name?: string;
 
   @Expose({ name: 'classId' })
-  @IsPositive()
-  @IsInt()
+  @IsMongoId()
   @IsOptional()
-  @Type(() => Number)
-  readonly class?: number;
+  readonly class?: string | ObjectId;
 
   /**
    * Định dạng score được truyền có thể là một trong 3 kiểu sau:
@@ -39,21 +36,23 @@ export class SearchStudentDto extends PaginationDto {
     if (
       !matches(
         value,
-        /([<>]=?)?\d\d?(.\d\d?)?((AND|OR)([<>]\=?)\d\d?(.\d\d?)?)?/g,
+        /([<>]=?)?(\d\d?(.\d\d?)?)((AND|OR)([<>]=?)(\d\d?(.\d\d?)?))?/g,
       )
     )
       return null;
 
     //Phân tách thành dựa trên các group
     const values = (value as string).match(
-      /(([<>]=?)?\d\d?(.\d\d?)?)((AND|OR)(([<>]=?)\d\d?(.\d\d?)?))?/,
+      /([<>]=?)?(\d\d?(.\d\d?)?)((AND|OR)([<>]=?)(\d\d?(.\d\d?)?))?/,
     );
 
     //Lấy ra các giá trị cần thiết cho các trường hợp
-    if (values.at(-1)) return [values[1], values[5], values[6]];
-    else return values[0];
+    if (values.at(-1))
+      return [values[1], values[2], values[5], values[6], values[7]];
+    else if (values[1]) return [values[1], values[2]];
+    return values[0];
   })
-  readonly score?: string | [string, 'AND' | 'OR', string] | null;
+  readonly score?: Expression;
 
   @IsEnum({
     NORMAL: 'NORMAL',

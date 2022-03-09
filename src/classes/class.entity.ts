@@ -1,20 +1,31 @@
-import { Student } from 'src/students/student.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Type } from 'class-transformer';
+import { Document } from 'mongodb';
+import { Student } from '../students/student.entity';
 
-@Entity()
+@Schema({ timestamps: true, id: true })
 export class Class {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column({ nullable: false, length: 60 })
+  @Prop({ type: String, required: true, maxlength: 60 })
   name: string;
 
-  @Column({ nullable: false, default: 0 })
+  @Prop({ type: Number, required: true, default: 0 })
   totalMember: number;
 
-  @Column({ nullable: false, length: 60 })
+  @Prop({ type: String, required: true, maxlength: 60 })
   teacherName: string;
 
-  @OneToMany(() => Student, (_student) => _student.class)
+  @Type(() => Student)
   students: Student[];
 }
+
+export type ClassDocument = Class & Document;
+
+const ClassSchema = SchemaFactory.createForClass(Class);
+
+ClassSchema.virtual('students', {
+  ref: 'Student',
+  localField: 'class',
+  foreignField: 'students',
+});
+
+export { ClassSchema };

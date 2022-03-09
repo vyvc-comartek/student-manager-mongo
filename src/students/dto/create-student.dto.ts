@@ -1,12 +1,6 @@
 import { Expose, Type } from 'class-transformer';
-import {
-  IsDate,
-  IsEmail,
-  IsEnum,
-  IsInt,
-  IsPositive,
-  Length,
-} from 'class-validator';
+import { IsDate, IsEmail, IsEnum, IsMongoId, Length } from 'class-validator';
+import mongoose from 'mongoose';
 
 export class CreateStudentDto {
   @Length(3, 60)
@@ -27,8 +21,6 @@ export class CreateStudentDto {
   readonly email: string;
 
   @Expose({ name: 'classId' })
-  @IsPositive()
-  @IsInt()
-  @Type(() => Number)
-  readonly class: number;
+  @IsMongoId()
+  readonly class: string | mongoose.Types.ObjectId;
 }

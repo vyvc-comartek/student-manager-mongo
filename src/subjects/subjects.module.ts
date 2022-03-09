@@ -4,13 +4,16 @@ import {
   Module,
   NestModule,
 } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
 import { ScoreModule } from 'src/scores/scores.module';
-import { Subject } from './subject.entity';
+import { Subject, SubjectSchema } from './subject.entity';
 import { SubjectsController } from './subjects.controller';
 import { SubjectsService } from './subjects.service';
 @Module({
-  imports: [TypeOrmModule.forFeature([Subject]), forwardRef(() => ScoreModule)],
+  imports: [
+    MongooseModule.forFeature([{ name: Subject.name, schema: SubjectSchema }]),
+    forwardRef(() => ScoreModule),
+  ],
   providers: [SubjectsService],
   controllers: [SubjectsController],
   exports: [SubjectsService],

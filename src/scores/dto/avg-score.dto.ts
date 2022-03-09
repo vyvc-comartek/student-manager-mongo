@@ -1,8 +1,8 @@
 import { IsMongoId, IsOptional } from 'class-validator';
 import { ObjectId } from 'mongodb';
 
-export class CheckExistSubjectDto {
+export class AvgScoreDto {
   @IsMongoId()
   @IsOptional()
-  readonly _id?: string | ObjectId;
+  readonly studentId?: string | ObjectId;
 }

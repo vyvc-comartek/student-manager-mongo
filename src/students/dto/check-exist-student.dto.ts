@@ -1,16 +1,12 @@
-import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsPositive } from 'class-validator';
+import { IsMongoId, IsOptional } from 'class-validator';
+import { ObjectId } from 'mongodb';
 
 export class CheckExistStudentDto {
-  @IsPositive()
-  @IsInt()
-  @Type(() => Number)
+  @IsMongoId()
   @IsOptional()
-  readonly class?: number;
+  readonly class?: string | ObjectId;
 
-  @IsPositive()
-  @IsInt()
-  @Type(() => Number)
+  @IsMongoId()
   @IsOptional()
-  readonly id?: number;
+  readonly _id?: string | ObjectId;
 }

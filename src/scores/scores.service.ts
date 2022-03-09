@@ -1,57 +1,54 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { FindConditions, Repository } from 'typeorm';
-import { Student } from '../students/student.entity';
-import { Subject } from '../subjects/subject.entity';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import {
   CheckExistScoreDto,
+  CreateScoreDto,
   DeleteScoreDto,
   SearchScoreDto,
   UpdateScoreDto,
 } from './dto';
-import { Score } from './score.entity';
+import { Score, ScoreDocument } from './score.entity';
 
 @Injectable()
 export class ScoresService {
   constructor(
-    @InjectRepository(Score)
-    private readonly scoresRepository: Repository<Score>,
+    @InjectModel(Score.name)
+    private readonly scoreModel: Model<ScoreDocument>,
   ) {}
 
-  async create({ student, subject, ...createScoreDto }: DeleteScoreDto) {
-    const newScore = {
-      ...createScoreDto,
-      student: { id: student } as Student,
-      subject: { id: subject } as Subject,
-    };
-
-    return this.scoresRepository.insert(newScore);
+  async create(createScoreDto: CreateScoreDto) {
+    return this.scoreModel.insertMany(createScoreDto);
   }
 
-  async update({ id, student, subject, score }: UpdateScoreDto) {
+  async update({ _id, student, subject, score }: UpdateScoreDto) {
     //updateById nếu id được cung cấp, updateByStudentSubjectId nếu id không được cung cấp
-    return this.scoresRepository.update(
-      id ? { id } : ({ student, subject } as FindConditions<Score>),
-      { score },
-    );
+    return this.scoreModel
+      .updateOne(_id ? { _id } : { student, subject }, {
+        score,
+      })
+      .exec();
   }
 
-  async delete({ id, student, subject }: DeleteScoreDto) {
-    return this.scoresRepository.delete(
-      id ? { id } : ({ student, subject } as FindConditions<Score>),
-    );
+  async delete({ _id, student, subject }: DeleteScoreDto) {
+    return this.scoreModel
+      .deleteOne(_id ? { _id } : { student, subject })
+      .exec();
   }
 
-  async search({ relations, ...searchScoreDto }: SearchScoreDto) {
-    return this.scoresRepository.findOne({
-      relations,
-      where: searchScoreDto,
-    });
+  async search({ populates, insertedId, ...searchScoreDto }: SearchScoreDto) {
+    let query = insertedId
+      ? this.scoreModel.findById({ _id: insertedId })
+      : this.scoreModel.findOne(searchScoreDto);
+
+    for (let i = populates.length - 1; i >= 0; i--) {
+      query = query.populate(populates[i]);
+    }
+
+    return query.exec();
   }
 
   async checkExist(checkExistScore: CheckExistScoreDto) {
-    return Boolean(
-      await this.scoresRepository.findOne({ where: checkExistScore }),
-    );
+    return Boolean(await this.scoreModel.findOne(checkExistScore).exec());
   }
 }

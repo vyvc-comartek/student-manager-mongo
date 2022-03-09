@@ -3,16 +3,15 @@ import {
   IsDate,
   IsEmail,
   IsEnum,
-  IsInt,
+  IsMongoId,
   IsOptional,
-  IsPositive,
   Length,
 } from 'class-validator';
+import { ObjectId } from 'mongodb';
+import mongoose from 'mongoose';
 export class UpdateStudentDto {
-  @IsPositive()
-  @IsInt()
-  @Type(() => Number)
-  readonly id: number;
+  @IsMongoId()
+  readonly _id: string | ObjectId;
 
   @Length(3, 60)
   @IsOptional()
@@ -36,9 +35,7 @@ export class UpdateStudentDto {
   readonly email?: string;
 
   @Expose({ name: 'classId' })
-  @IsPositive()
-  @IsInt()
+  @IsMongoId()
   @IsOptional()
-  @Type(() => Number)
-  readonly class?: number;
+  readonly class?: string | mongoose.Types.ObjectId;
 }

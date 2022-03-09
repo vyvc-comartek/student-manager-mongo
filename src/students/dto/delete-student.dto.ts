@@ -1,9 +1,6 @@
-import { Type } from 'class-transformer';
-import { IsInt, IsPositive } from 'class-validator';
-
+import { IsMongoId } from 'class-validator';
+import { ObjectId } from 'mongodb';
 export class DeleteStudentDto {
-  @IsPositive()
-  @IsInt()
-  @Type(() => Number)
-  readonly id: number;
+  @IsMongoId()
+  readonly _id: string | ObjectId;
 }

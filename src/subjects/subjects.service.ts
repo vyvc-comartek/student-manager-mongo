@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Subject } from 'src/subjects/subject.entity';
-import { Repository } from 'typeorm';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import {
   CheckExistSubjectDto,
   CreateSubjectDto,
@@ -9,42 +8,42 @@ import {
   SearchSubjectDto,
   UpdateSubjectDto,
 } from './dto';
+import { SubjectDocument } from './subject.entity';
 
 @Injectable()
 export class SubjectsService {
   constructor(
-    @InjectRepository(Subject)
-    private readonly subjectsRepository: Repository<Subject>,
+    @InjectModel('Subject')
+    private readonly subjectModel: Model<SubjectDocument>,
   ) {}
 
   async create(createSubjectDto: CreateSubjectDto) {
-    return this.subjectsRepository.insert(createSubjectDto);
+    return this.subjectModel.insertMany(createSubjectDto);
   }
 
-  async update({ id, name, type }: UpdateSubjectDto) {
-    if (id && name)
-      return this.subjectsRepository.update({ id }, { name, type });
+  async update({ _id, name, type }: UpdateSubjectDto) {
+    if (_id && name)
+      return this.subjectModel.updateOne({ _id }, { name, type }).exec();
 
-    if (id && !name) return this.subjectsRepository.update({ id }, { type });
+    if (_id && !name)
+      return this.subjectModel.updateOne({ _id }, { type }).exec();
 
-    return this.subjectsRepository.update({ name }, { type });
+    return this.subjectModel.updateOne({ name }, { type }).exec();
   }
 
-  async delete({ id, name }: DeleteSubjectDto) {
-    return this.subjectsRepository.delete(id ? { id } : { name });
+  async delete({ _id, name }: DeleteSubjectDto) {
+    return this.subjectModel.deleteOne(_id ? { _id } : { name }).exec();
   }
 
   async search(searchSubjectDto: SearchSubjectDto) {
-    return this.subjectsRepository.findOne(searchSubjectDto);
+    return this.subjectModel.findOne(searchSubjectDto).exec();
   }
 
   async checkExist(checkExistSubject: CheckExistSubjectDto) {
-    return Boolean(
-      await this.subjectsRepository.findOne({ where: checkExistSubject }),
-    );
+    return Boolean(await this.subjectModel.findOne(checkExistSubject).exec());
   }
 
   async countSubjects() {
-    return this.subjectsRepository.count();
+    return this.subjectModel.count().exec();
   }
 }

@@ -1,12 +1,10 @@
-import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsPositive, Length } from 'class-validator';
+import { IsEnum, IsMongoId, IsOptional, Length } from 'class-validator';
+import { ObjectId } from 'mongodb';
 
 export class SearchSubjectDto {
-  @IsPositive()
-  @IsInt()
+  @IsMongoId()
   @IsOptional()
-  @Type(() => Number)
-  readonly id?: number;
+  readonly _id?: string | ObjectId;
 
   @Length(3, 60)
   @IsOptional()

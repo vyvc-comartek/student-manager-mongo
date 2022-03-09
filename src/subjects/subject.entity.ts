@@ -1,16 +1,18 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-@Entity()
-export class Subject {
-  @PrimaryGeneratedColumn()
-  id: number;
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-  @Column({ nullable: false, unique: true, length: 128 })
+@Schema({ timestamps: true, id: true })
+export class Subject {
+  @Prop({ type: String, required: true, unique: true, maxLength: 128 })
   name: string;
 
-  @Column('enum', {
-    nullable: false,
-    enum: ['Online', 'Offline'],
+  @Prop({
+    type: String,
+    enum: { values: ['Online', 'Offline'] },
     default: 'Offline',
   })
   type: 'Online' | 'Offline';
 }
+
+export type SubjectDocument = Subject & Document;
+
+export const SubjectSchema = SchemaFactory.createForClass(Subject);

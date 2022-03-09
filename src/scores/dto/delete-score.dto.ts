@@ -1,24 +1,20 @@
-import { Expose, Type } from 'class-transformer';
-import { IsInt, IsPositive, ValidateIf } from 'class-validator';
+import { Expose } from 'class-transformer';
+import { IsMongoId, ValidateIf } from 'class-validator';
+import { ObjectId } from 'mongodb';
+import mongoose from 'mongoose';
 
 export class DeleteScoreDto {
   @ValidateIf((o) => o.id || !o.subject || !o.student)
-  @IsPositive()
-  @IsInt()
-  @Type(() => Number)
-  readonly id?: number;
+  @IsMongoId()
+  readonly _id?: string | mongoose.Types.ObjectId;
 
   @Expose({ name: 'subjectId' })
   @ValidateIf((o) => !o.id || o.subject || o.student)
-  @IsPositive()
-  @IsInt()
-  @Type(() => Number)
-  readonly subject?: number;
+  @IsMongoId()
+  readonly subject?: string | mongoose.Types.ObjectId;
 
   @Expose({ name: 'studentId' })
   @ValidateIf((o) => !o.id || o.subject || o.student)
-  @IsPositive()
-  @IsInt()
-  @Type(() => Number)
-  readonly student?: number;
+  @IsMongoId()
+  readonly student?: string | mongoose.Types.ObjectId;
 }

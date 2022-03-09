@@ -1,11 +1,9 @@
-import { Type } from 'class-transformer';
-import { IsInt, IsPositive, Length, ValidateIf } from 'class-validator';
+import { IsMongoId, Length, ValidateIf } from 'class-validator';
+import { ObjectId } from 'mongodb';
 export class DeleteSubjectDto {
   @ValidateIf((o) => o.id || !o.name)
-  @IsPositive()
-  @IsInt()
-  @Type(() => Number)
-  readonly id?: number;
+  @IsMongoId()
+  readonly _id?: string | ObjectId;
 
   @ValidateIf((o) => !o.id || o.name)
   @Length(3, 60)

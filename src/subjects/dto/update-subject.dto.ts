@@ -1,12 +1,10 @@
-import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsPositive, Length, ValidateIf } from 'class-validator';
+import { IsEnum, IsMongoId, Length, ValidateIf } from 'class-validator';
+import { ObjectId } from 'mongodb';
 
 export class UpdateSubjectDto {
   @ValidateIf((o) => o.id || !o.name)
-  @IsPositive()
-  @IsInt()
-  @Type(() => Number)
-  readonly id?: number;
+  @IsMongoId()
+  readonly _id?: string | ObjectId;
 
   @ValidateIf((o) => !o.id || o.name)
   @Length(3, 60)

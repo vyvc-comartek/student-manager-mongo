@@ -1,38 +1,41 @@
-import { Expose, Type } from 'class-transformer';
-import {
-  ArrayMaxSize,
-  IsInt,
-  IsOptional,
-  IsPositive,
-  Matches,
-} from 'class-validator';
+import { Expose } from 'class-transformer';
+import { ArrayMaxSize, IsMongoId, IsOptional, Matches } from 'class-validator';
+import mongoose from 'mongoose';
 
 export class SearchScoreDto {
-  @IsPositive()
-  @IsInt()
+  @IsMongoId()
   @IsOptional()
-  @Type(() => Number)
-  readonly id?: number;
+  readonly _id?: string | mongoose.Types.ObjectId;
 
   @Matches(/\d(.\d)?([><]=?\d(.\d)?)?/g)
   @IsOptional()
   readonly score?: string;
 
   @Expose({ name: 'subjectId' })
-  @IsPositive()
-  @IsInt()
+  @IsMongoId()
   @IsOptional()
-  @Type(() => Number)
-  readonly subject?: number;
+  readonly subject?: string | mongoose.Types.ObjectId;
 
   @Expose({ name: 'studentId' })
-  @IsPositive()
-  @IsInt()
+  @IsMongoId()
   @IsOptional()
-  @Type(() => Number)
-  readonly student?: number;
+  readonly student?: string | mongoose.Types.ObjectId;
 
   @ArrayMaxSize(6)
   @IsOptional()
-  readonly relations?: string[] = ['student', 'subject'];
+  readonly populates?: {}[] = [
+    {
+      path: 'student',
+      populate: {
+        path: 'scores',
+        populate: {
+          path: 'subject',
+        },
+      },
+    },
+    { path: 'subject', model: 'Subject' },
+  ];
+
+  @IsOptional()
+  readonly insertedId?: mongoose.Types.ObjectId;
 }

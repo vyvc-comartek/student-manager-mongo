@@ -40,7 +40,7 @@ export class ClassesController {
   @Delete()
   async delete(@Body() deleteClassDto: DeleteClassDto) {
     const isStudentRefClass = await this.studentsService.checkExist({
-      class: deleteClassDto.id,
+      class: deleteClassDto._id,
     });
 
     //Kiểm tra có student nào liên kết với class này không
