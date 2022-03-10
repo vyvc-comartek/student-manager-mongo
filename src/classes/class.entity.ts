@@ -3,7 +3,13 @@ import { Type } from 'class-transformer';
 import { Document } from 'mongodb';
 import { Student } from '../students/student.entity';
 
-@Schema({ timestamps: true, id: true })
+@Schema({
+  timestamps: true,
+  id: true,
+  toObject: { virtuals: true },
+  toJSON: { virtuals: true },
+  selectPopulatedPaths: true,
+})
 export class Class {
   @Prop({ type: String, required: true, maxlength: 60 })
   name: string;
@@ -24,8 +30,8 @@ const ClassSchema = SchemaFactory.createForClass(Class);
 
 ClassSchema.virtual('students', {
   ref: 'Student',
-  localField: 'class',
-  foreignField: 'students',
+  localField: '_id',
+  foreignField: 'class',
 });
 
 export { ClassSchema };

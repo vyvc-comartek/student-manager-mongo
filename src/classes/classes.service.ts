@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Expression, Operators } from '../modules/expression.collection';
+import { Expression, OperatorKeyMap } from '../modules/expression.collection';
 import { Class, ClassDocument } from './class.entity';
 import {
   CheckExistClassDto,
@@ -40,8 +40,11 @@ export class ClassesService {
     page,
   }: SearchClassDto) {
     //Nếu có trường id, trả về 1 kết quả dựa trên id
-    if (_id) return;
-    await this.classesModel.findOne({ _id }).exec();
+    if (_id)
+      return await this.classesModel
+        .findOne({ _id })
+        .populate({ path: 'students', model: 'Student' })
+        .exec();
 
     const conditions = [];
 
@@ -78,7 +81,7 @@ export class ClassesService {
   private _totalMemberSearchRaw(totalMember: Expression) {
     if (typeof totalMember === 'string') return +totalMember;
 
-    const op1 = `$${(Operators[totalMember[0]] as string).toLocaleLowerCase()}`;
+    const op1 = `$${OperatorKeyMap.get(totalMember[0]).toLocaleLowerCase()}`;
 
     if (totalMember.length === 2) {
       return {
@@ -86,7 +89,7 @@ export class ClassesService {
       };
     }
 
-    const op2 = `$${(Operators[totalMember[3]] as string).toLocaleLowerCase()}`;
+    const op2 = `$${OperatorKeyMap.get(totalMember[3]).toLocaleLowerCase()}`;
     const bitwise = `$${totalMember[2].toLocaleLowerCase()}`;
 
     return {

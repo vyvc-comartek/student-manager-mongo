@@ -4,7 +4,13 @@ import mongoose from 'mongoose';
 import { Class } from '../classes/class.entity';
 import { Score } from '../scores/score.entity';
 
-@Schema({ timestamps: true, id: true, toObject: { virtuals: true } })
+@Schema({
+  timestamps: true,
+  id: true,
+  toObject: { virtuals: true },
+  toJSON: { virtuals: true },
+  selectPopulatedPaths: true,
+})
 export class Student {
   @Prop({ type: String, required: true, maxLength: 60 })
   name: string;
@@ -26,7 +32,6 @@ export class Student {
   @Type(() => Class)
   class: Class;
 
-  @Type(() => Score)
   scores: Score[];
 }
 
@@ -36,8 +41,15 @@ const StudentSchema = SchemaFactory.createForClass(Student);
 
 StudentSchema.virtual('scores', {
   ref: 'Score',
-  localField: 'student',
-  foreignField: 'students',
+  localField: '_id',
+  foreignField: 'student',
+});
+
+StudentSchema.virtual('scoreAvg').get(function (this: StudentDocument) {
+  return this.scores
+    ? this.scores.reduce((result, { score }) => result + score, 0) /
+        this.scores.length
+    : 0;
 });
 
 export { StudentSchema };

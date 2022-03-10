@@ -37,9 +37,7 @@ export class ScoresService {
   }
 
   async search({ populates, insertedId, ...searchScoreDto }: SearchScoreDto) {
-    let query = insertedId
-      ? this.scoreModel.findById({ _id: insertedId })
-      : this.scoreModel.findOne(searchScoreDto);
+    let query = this.scoreModel.findOne(insertedId || searchScoreDto);
 
     for (let i = populates.length - 1; i >= 0; i--) {
       query = query.populate(populates[i]);

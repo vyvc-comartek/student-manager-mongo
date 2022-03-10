@@ -56,16 +56,14 @@ export class ScoresController {
           populates: [
             {
               path: 'student',
-              populate: [
-                {
-                  path: 'scores',
-                  populate: {
-                    path: 'subject',
-                  },
+              populate: {
+                path: 'scores',
+                populate: {
+                  path: 'subject',
                 },
-              ],
+              },
             },
-            { path: 'subject' },
+            { path: 'subject', model: 'Subject' },
           ],
         }),
         readFile('./xlsx-template/attch-email.xlsx'),
