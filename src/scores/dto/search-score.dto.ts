@@ -23,18 +23,7 @@ export class SearchScoreDto {
 
   @ArrayMaxSize(6)
   @IsOptional()
-  readonly populates?: {}[] = [
-    {
-      path: 'student',
-      populate: {
-        path: 'scores',
-        populate: {
-          path: 'subject',
-        },
-      },
-    },
-    { path: 'subject', model: 'Subject' },
-  ];
+  readonly populates?: {}[] = [];
 
   @IsOptional()
   readonly insertedId?: mongoose.Types.ObjectId;

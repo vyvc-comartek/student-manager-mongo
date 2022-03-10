@@ -47,7 +47,7 @@ export class SearchStudentDto extends PaginationDto {
     );
 
     //Lấy ra các giá trị cần thiết cho các trường hợp
-    if (values.at(-1))
+    if (values.at(-2))
       return [values[1], values[2], values[5], values[6], values[7]];
     else if (values[1]) return [values[1], values[2]];
     return values[0];

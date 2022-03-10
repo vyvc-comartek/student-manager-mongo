@@ -71,7 +71,7 @@ export class StudentsController {
 
   @Get()
   async search(@Query() searchStudentDto: SearchStudentDto) {
-    return this.studentsService.search(searchStudentDto);
+    return await this.studentsService.search(searchStudentDto);
   }
 
   @Get('excel')

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ClassDocument } from '../classes/class.entity';
-import { Expression, Operators } from '../modules/expression.collection';
+import { Expression, OperatorKeyMap } from '../modules/expression.collection';
 import {
   CheckExistStudentDto,
   CreateStudentDto,
@@ -58,14 +58,7 @@ export class StudentsService {
     //Nếu có trường id, trả về 1 kết quả dựa trên id
     if (_id)
       return {
-        result: [
-          (
-            await this.studentModel
-              .findById(_id)
-              .populate({ path: 'scores', model: 'Score' })
-              .exec()
-          ).scores,
-        ],
+        result: [await this.studentModel.findOne({ _id }).exec()],
         page: 1,
       };
 
@@ -91,7 +84,7 @@ export class StudentsService {
         match: conditions['score'],
       });
 
-    title = `${typeof score === 'string' ? score : score.join(' ')}`;
+    title = `${typeof score === 'object' ? score.join(' ') : score}`;
 
     //Thực hiện nhảy tới trang cần get dựa trên page và itemsPerPage
     if (itemsPerPage && page)
@@ -99,7 +92,7 @@ export class StudentsService {
 
     return {
       title: title,
-      result: await query.lean().exec(),
+      result: (await query.lean().exec()).filter((q) => q.scores.length > 0),
       page: page,
     };
   }
@@ -114,7 +107,7 @@ export class StudentsService {
 
     //Ví dụ giá trị của op1: {$gte: 6.5}
     const op1 = {
-      [`$${(Operators[score[0]] as string).toLocaleLowerCase()}`]: +score[1],
+      [`$${OperatorKeyMap.get(score[0]).toLocaleLowerCase()}`]: +score[1],
     };
 
     //score=<operator><number>
@@ -122,7 +115,7 @@ export class StudentsService {
 
     //Ví dụ giá trị của op2: {$lte: 6.5}
     const op2 = {
-      [`$${(Operators[score[3]] as string).toLocaleLowerCase()}`]: +score[4],
+      [`$${OperatorKeyMap.get(score[3]).toLocaleLowerCase()}`]: +score[4],
     };
     const bitwise = `$${score[2].toLocaleLowerCase()}`;
 

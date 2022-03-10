@@ -4,7 +4,13 @@ import mongoose from 'mongoose';
 import { Student } from '../students/student.entity';
 import { Subject } from '../subjects/subject.entity';
 
-@Schema({ timestamps: true, id: true })
+@Schema({
+  timestamps: true,
+  id: true,
+  toObject: { virtuals: true },
+  toJSON: { virtuals: true },
+  selectPopulatedPaths: true,
+})
 export class Score {
   @Prop({
     type: Number,
@@ -15,7 +21,10 @@ export class Score {
   })
   score: number;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Student' })
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Student',
+  })
   @Type(() => Student)
   student: Student;
 
