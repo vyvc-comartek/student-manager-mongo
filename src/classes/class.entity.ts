@@ -1,8 +1,10 @@
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Type } from 'class-transformer';
 import { Document } from 'mongodb';
 import { Student } from '../students/student.entity';
 
+@ObjectType()
 @Schema({
   timestamps: true,
   id: true,
@@ -14,6 +16,7 @@ export class Class {
   @Prop({ type: String, required: true, maxlength: 60 })
   name: string;
 
+  @Field(() => Int)
   @Prop({ type: Number, required: true, default: 0 })
   totalMember: number;
 

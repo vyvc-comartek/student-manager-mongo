@@ -1,9 +1,13 @@
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Transform } from 'class-transformer';
 import { IsEnum, IsMongoId, IsOptional, Length } from 'class-validator';
+import mongoose from 'mongoose';
 import { PaginationDto } from 'src/modules/pagination.dto';
 import { Expression } from '../../modules/expression.collection';
-import mongoose from 'mongoose';
+
+@ArgsType()
 export class SearchClassDto extends PaginationDto {
+  @Field(() => String)
   @IsMongoId()
   @IsOptional()
   readonly _id?: string | mongoose.Types.ObjectId;
@@ -18,6 +22,7 @@ export class SearchClassDto extends PaginationDto {
    * - Trong khoảng trái hoặc phải của trục số: totalMember=>=5
    * - Trong khoảng giữa của trục số: totalMember=<=5OR>8
    */
+  @Field(() => String)
   @IsOptional()
   @Transform(({ value }) => {
     const values = (value as string).match(
@@ -34,6 +39,7 @@ export class SearchClassDto extends PaginationDto {
   @IsOptional()
   readonly teacherName?: string;
 
+  @Field(() => String)
   @IsEnum({
     AND: 'AND',
     OR: 'OR',

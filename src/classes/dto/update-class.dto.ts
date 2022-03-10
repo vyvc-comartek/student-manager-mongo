@@ -1,9 +1,12 @@
+import { ArgsType, Field } from '@nestjs/graphql';
 import { IsMongoId, IsOptional, Length } from 'class-validator';
-import { ObjectId } from 'mongodb';
+import mongoose from 'mongoose';
 
+@ArgsType()
 export class UpdateClassDto {
+  @Field(() => String)
   @IsMongoId()
-  readonly _id: string | ObjectId;
+  readonly _id: string | mongoose.Types.ObjectId;
 
   @Length(3, 60)
   @IsOptional()

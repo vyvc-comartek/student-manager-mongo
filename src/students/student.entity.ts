@@ -1,9 +1,11 @@
+import { Field, ObjectType, Int } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Type } from 'class-transformer';
 import mongoose from 'mongoose';
 import { Class } from '../classes/class.entity';
 import { Score } from '../scores/score.entity';
 
+@ObjectType()
 @Schema({
   timestamps: true,
   id: true,
@@ -18,6 +20,7 @@ export class Student {
   @Prop({ type: Date, required: true })
   dob: Date;
 
+  @Field(() => String)
   @Prop({
     type: String,
     enum: { values: ['Male', 'Female', 'Other'] },
@@ -32,7 +35,12 @@ export class Student {
   @Type(() => Class)
   class: Class;
 
+  @Type(() => Score)
   scores: Score[];
+
+  @Field(() => Int)
+  @Type(() => Number)
+  scoreAvg: number;
 }
 
 export type StudentDocument = Student & Document;

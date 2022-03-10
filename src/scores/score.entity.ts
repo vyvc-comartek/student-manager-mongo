@@ -1,9 +1,11 @@
+import { Field, Float, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Type } from 'class-transformer';
 import mongoose from 'mongoose';
 import { Student } from '../students/student.entity';
 import { Subject } from '../subjects/subject.entity';
 
+@ObjectType()
 @Schema({
   timestamps: true,
   id: true,
@@ -12,6 +14,7 @@ import { Subject } from '../subjects/subject.entity';
   selectPopulatedPaths: true,
 })
 export class Score {
+  @Field(() => Float)
   @Prop({
     type: Number,
     required: true,

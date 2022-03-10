@@ -1,3 +1,4 @@
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Expose, Type } from 'class-transformer';
 import {
   IsDate,
@@ -7,11 +8,13 @@ import {
   IsOptional,
   Length,
 } from 'class-validator';
-import { ObjectId } from 'mongodb';
 import mongoose from 'mongoose';
+
+@ArgsType()
 export class UpdateStudentDto {
+  @Field(() => String)
   @IsMongoId()
-  readonly _id: string | ObjectId;
+  readonly _id: string | mongoose.Types.ObjectId;
 
   @Length(3, 60)
   @IsOptional()
@@ -22,6 +25,7 @@ export class UpdateStudentDto {
   @IsOptional()
   readonly dob?: Date;
 
+  @Field(() => String)
   @IsEnum({
     MALE: 'Male',
     FEMALE: 'Female',
@@ -34,6 +38,7 @@ export class UpdateStudentDto {
   @IsOptional()
   readonly email?: string;
 
+  @Field(() => String)
   @Expose({ name: 'classId' })
   @IsMongoId()
   @IsOptional()

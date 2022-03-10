@@ -1,3 +1,4 @@
+import { ArgsType, Field } from '@nestjs/graphql';
 import { Expose, Transform } from 'class-transformer';
 import {
   IsEnum,
@@ -6,23 +7,26 @@ import {
   Length,
   matches,
 } from 'class-validator';
-import { ObjectId } from 'mongodb';
+import mongoose from 'mongoose';
 import { PaginationDto } from 'src/modules/pagination.dto';
 import { Expression } from '../../modules/expression.collection';
 
+@ArgsType()
 export class SearchStudentDto extends PaginationDto {
+  @Field(() => String)
   @IsOptional()
   @IsMongoId()
-  readonly _id?: string | ObjectId;
+  readonly _id?: string | mongoose.Types.ObjectId;
 
   @Length(1, 60)
   @IsOptional()
   readonly name?: string;
 
+  @Field(() => String)
   @Expose({ name: 'classId' })
   @IsMongoId()
   @IsOptional()
-  readonly class?: string | ObjectId;
+  readonly class?: string | mongoose.Types.ObjectId;
 
   /**
    * Định dạng score được truyền có thể là một trong 3 kiểu sau:

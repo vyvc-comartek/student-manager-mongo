@@ -1,8 +1,11 @@
+import { ArgsType, Field } from '@nestjs/graphql';
 import { IsMongoId, IsOptional } from 'class-validator';
-import { ObjectId } from 'mongodb';
+import mongoose from 'mongoose';
 
+@ArgsType()
 export class AvgScoreDto {
+  @Field(() => String)
   @IsMongoId()
   @IsOptional()
-  readonly studentId?: string | ObjectId;
+  readonly studentId?: string | mongoose.Types.ObjectId;
 }

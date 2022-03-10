@@ -1,8 +1,10 @@
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { TransportType } from '@nestjs-modules/mailer/dist/interfaces/mailer-options.interface';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { GraphQLModule } from '@nestjs/graphql';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -25,6 +27,14 @@ import { SubjectModule } from './subjects/subjects.module';
         useUnifiedTopology: true,
         useNewUrlParser: true,
       }),
+    }),
+
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: 'schema.gql',
+      installSubscriptionHandlers: true,
+      sortSchema: true,
+      debug: true,
     }),
 
     MailerModule.forRootAsync({

@@ -1,6 +1,10 @@
+import { ArgsType, Field } from '@nestjs/graphql';
 import { IsMongoId } from 'class-validator';
-import { ObjectId } from 'mongodb';
+import mongoose from 'mongoose';
+
+@ArgsType()
 export class DeleteStudentDto {
+  @Field(() => String)
   @IsMongoId()
-  readonly _id: string | ObjectId;
+  readonly _id: string | mongoose.Types.ObjectId;
 }

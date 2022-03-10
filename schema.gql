@@ -1,0 +1,40 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Class {
+  name: String!
+  students: [Student!]!
+  teacherName: String!
+  totalMember: Int!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Query {
+  classes(_id: String, name: String, operator: String!, teacherName: String, totalMember: String): [Class!]!
+}
+
+type Score {
+  score: Float!
+  student: Student!
+  subject: Subject!
+}
+
+type Student {
+  class: Class!
+  dob: DateTime!
+  email: String!
+  gender: String!
+  name: String!
+  scoreAvg: Int!
+  scores: [Score!]!
+}
+
+type Subject {
+  name: String!
+  type: String!
+}

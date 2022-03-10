@@ -3,6 +3,15 @@
   "sourceRoot": "src",
   "compilerOptions": {
     "assets": ["email-template/**/*.hbs", "xlsx-template/**/*.xlsx"],
-    "watchAssets": true
+    "watchAssets": true,
+    "plugins": [
+      {
+        "name": "@nestjs/graphql",
+        "options": {
+          "typeFileNameSuffix": [".entity.ts", ".dto.ts"],
+          "introspectComments": true
+        }
+      }
+    ]
   }
 }
