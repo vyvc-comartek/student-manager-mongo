@@ -1,23 +1,21 @@
-import { ArgsType, Field } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { IsEnum, IsMongoId, Length, ValidateIf } from 'class-validator';
 import mongoose from 'mongoose';
+import { SubjectTypes } from '../../types/enum/subject-types.enum';
+import { MongoId } from '../../types/union/mongo-id.union';
 
-@ArgsType()
+@InputType()
 export class UpdateSubjectDto {
   @Field(() => String)
   @ValidateIf((o) => o.id || !o.name)
   @IsMongoId()
-  readonly _id?: string | mongoose.Types.ObjectId;
+  readonly _id?: MongoId;
 
   @ValidateIf((o) => !o.id || o.name)
   @Length(3, 60)
   readonly name?: string;
 
-  @Field(() => String)
   @ValidateIf((o) => o.type || !o.name)
-  @IsEnum({
-    ONLINE: 'Online',
-    OFFLINE: 'Offline',
-  } as const)
-  readonly type?: 'Online' | 'Offline';
+  @IsEnum(SubjectTypes)
+  readonly type?: SubjectTypes;
 }

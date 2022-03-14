@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ClassDocument } from '../classes/class.entity';
-import { Expression, OperatorKeyMap } from '../modules/expression.collection';
+import { CompareOperatorKeyMap } from 'src/types/enum/compare-operators.enum';
+import { SearchExpression } from 'src/types/union/search-expression.union';
 import {
   CheckExistStudentDto,
   CreateStudentDto,
   DeleteStudentDto,
   SearchStudentDto,
+  SearchStudentResult,
   UpdateStudentDto,
 } from './dto';
 import { StudentDocument } from './student.entity';
@@ -17,8 +18,6 @@ export class StudentsService {
   constructor(
     @InjectModel('Student')
     private readonly studentModel: Model<StudentDocument>,
-    @InjectModel('Class')
-    private readonly classModel: Model<ClassDocument>,
   ) {}
 
   async create({ class: clss, ...createStudentDto }: CreateStudentDto) {
@@ -27,22 +26,18 @@ export class StudentsService {
       class: clss,
     };
 
-    return this.studentModel.insertMany(newStudent).then((value) => {
-      //Cập nhật totalMember trong bảng Class khi insert Student thành công
-      this.classModel
-        .findOneAndUpdate({ _id: clss }, { $inc: { totalMember: 1 } })
-        .exec();
-
-      return value;
-    });
+    return this.studentModel.insertMany(newStudent);
   }
 
   async update({ _id, ...updateStudentDto }: UpdateStudentDto) {
-    return this.studentModel.updateOne({ _id }, updateStudentDto).exec();
+    return this.studentModel
+      .updateOne({ _id }, updateStudentDto, { new: true })
+      .lean()
+      .exec();
   }
 
   async delete({ _id }: DeleteStudentDto) {
-    return this.studentModel.deleteOne({ _id }).exec();
+    return this.studentModel.deleteOne({ _id }).lean().exec();
   }
 
   async search({
@@ -58,33 +53,37 @@ export class StudentsService {
     //Nếu có trường id, trả về 1 kết quả dựa trên id
     if (_id)
       return {
-        result: [await this.studentModel.findOne({ _id }).exec()],
+        result: await this.studentModel.find({ _id }).lean().exec(),
         page: 1,
-      };
+        title,
+      } as SearchStudentResult;
 
     let conditions = {};
 
     if (name) conditions['name'] = { name: { $regex: '.*' + name + '.*' } };
 
-    if (clss) conditions['class'] = { _id: clss };
+    if (clss) conditions['class'] = { class: clss };
 
-    if (score) conditions['score'] = this._getScoreCondition(score);
+    let query = this.studentModel.find({
+      ...conditions['name'],
+      ...conditions['class'],
+    });
 
-    //Join bảng
-    let query = this.studentModel
-      .find(conditions['name'])
-      .populate({
-        path: 'class',
-        select: { name: 1 },
-        match: conditions['class'],
-      })
-      .populate({
-        path: 'scores',
-        select: { score: 1 },
-        match: conditions['score'],
-      });
+    if (score) {
+      conditions['score'] = this._getScoreCondition(score);
 
-    title = `${typeof score === 'object' ? score.join(' ') : score}`;
+      //Join bảng
+      query = query
+        .populate({
+          path: 'class',
+        })
+        .populate({
+          path: 'scores',
+          match: conditions['score'],
+        });
+
+      title = `${typeof score === 'object' ? score.join(' ') : score}`;
+    }
 
     //Thực hiện nhảy tới trang cần get dựa trên page và itemsPerPage
     if (itemsPerPage && page)
@@ -92,30 +91,34 @@ export class StudentsService {
 
     return {
       title: title,
-      result: (await query.lean().exec()).filter((q) => q.scores.length > 0),
+      result: (await query.lean().exec()).filter(
+        (q) => (q.scores ? q.scores.length : 1) > 0,
+      ),
       page: page,
-    };
+    } as SearchStudentResult;
   }
 
   async searchById({ _id }: Pick<SearchStudentDto, '_id'>) {
-    return this.studentModel.findOne({ _id }).exec();
+    return this.studentModel.findOne({ _id }).lean().exec();
   }
 
-  private _getScoreCondition(score: Expression) {
+  private _getScoreCondition(score: SearchExpression) {
     //score=<number>
-    if (typeof score === 'string') return +score;
+    if (typeof score === 'string') return { score: +score };
 
-    //Ví dụ giá trị của op1: {$gte: 6.5}
+    //Giá trị của op1 có dạng: {$gte: 6.5}
     const op1 = {
-      [`$${OperatorKeyMap.get(score[0]).toLocaleLowerCase()}`]: +score[1],
+      [`$${CompareOperatorKeyMap.get(score[0]).toLocaleLowerCase()}`]:
+        +score[1],
     };
 
     //score=<operator><number>
     if (score.length === 2) return { score: op1 };
 
-    //Ví dụ giá trị của op2: {$lte: 6.5}
+    //Giá trị của op2 có dạng: {$lte: 6.5}
     const op2 = {
-      [`$${OperatorKeyMap.get(score[3]).toLocaleLowerCase()}`]: +score[4],
+      [`$${CompareOperatorKeyMap.get(score[3]).toLocaleLowerCase()}`]:
+        +score[4],
     };
     const bitwise = `$${score[2].toLocaleLowerCase()}`;
 
@@ -127,7 +130,7 @@ export class StudentsService {
 
   async checkExist(checkExistStudentDto: CheckExistStudentDto) {
     return Boolean(
-      await this.studentModel.findOne(checkExistStudentDto).exec(),
+      await this.studentModel.findOne(checkExistStudentDto).lean().exec(),
     );
   }
 }

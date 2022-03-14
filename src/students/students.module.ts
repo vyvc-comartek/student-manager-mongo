@@ -11,6 +11,7 @@ import { ClassModule } from '../classes/classes.module';
 import { ExcelModule } from '../modules/excel/excel.module';
 import { Student, StudentSchema } from './student.entity';
 import { StudentsController } from './students.controller';
+import { StudentsResolver } from './students.resolver';
 import { StudentsService } from './students.service';
 
 @Module({
@@ -23,9 +24,9 @@ import { StudentsService } from './students.service';
     forwardRef(() => ClassModule),
     forwardRef(() => ExcelModule),
   ],
-  providers: [StudentsService],
+  providers: [StudentsService, StudentsResolver],
   controllers: [StudentsController],
-  exports: [StudentsService],
+  exports: [StudentsService, StudentsResolver],
 })
 export class StudentModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

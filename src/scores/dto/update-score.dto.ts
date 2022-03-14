@@ -1,26 +1,26 @@
-import { ArgsType, Field } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { Expose, Type } from 'class-transformer';
 import { IsMongoId, Max, Min, ValidateIf } from 'class-validator';
-import mongoose from 'mongoose';
+import { MongoId } from '../../types/union/mongo-id.union';
 
-@ArgsType()
+@InputType()
 export class UpdateScoreDto {
   @Field(() => String)
   @ValidateIf((o) => o.id || !o.subject || !o.student)
   @IsMongoId()
-  readonly _id?: string | mongoose.Types.ObjectId;
+  readonly _id?: MongoId;
 
-  @Field(() => String)
+  @Field(() => String, { name: 'studentId' })
   @Expose({ name: 'studentId' })
   @ValidateIf((o) => !o.id || (o.subject && o.student))
   @IsMongoId()
-  readonly student?: string | mongoose.Types.ObjectId;
+  readonly student?: MongoId;
 
-  @Field(() => String)
+  @Field(() => String, { name: 'subjectId' })
   @Expose({ name: 'subjectId' })
   @ValidateIf((o) => !o.id || (o.subject && o.student))
   @IsMongoId()
-  readonly subject?: string | mongoose.Types.ObjectId;
+  readonly subject?: MongoId;
 
   @Min(1)
   @Max(10)

@@ -1,4 +1,4 @@
-import { ArgsType, Field } from '@nestjs/graphql';
+import { ArgsType, Field, Int, ObjectType } from '@nestjs/graphql';
 import { Expose, Transform } from 'class-transformer';
 import {
   IsEnum,
@@ -7,26 +7,28 @@ import {
   Length,
   matches,
 } from 'class-validator';
-import mongoose from 'mongoose';
 import { PaginationDto } from 'src/modules/pagination.dto';
-import { Expression } from '../../modules/expression.collection';
+import { SearchStudentMode } from 'src/types/enum/search-student-mode.enum';
+import { SearchExpression } from 'src/types/union/search-expression.union';
+import { MongoId } from '../../types/union/mongo-id.union';
+import { Student } from '../student.entity';
 
 @ArgsType()
 export class SearchStudentDto extends PaginationDto {
   @Field(() => String)
   @IsOptional()
   @IsMongoId()
-  readonly _id?: string | mongoose.Types.ObjectId;
+  readonly _id?: MongoId;
 
   @Length(1, 60)
   @IsOptional()
   readonly name?: string;
 
-  @Field(() => String)
+  @Field(() => String, { name: 'classId' })
   @Expose({ name: 'classId' })
   @IsMongoId()
   @IsOptional()
-  readonly class?: string | mongoose.Types.ObjectId;
+  readonly class?: MongoId;
 
   /**
    * Định dạng score được truyền có thể là một trong 3 kiểu sau:
@@ -34,6 +36,7 @@ export class SearchStudentDto extends PaginationDto {
    * - Trong khoảng trái (hoặc phải) của trục số: score=>=5.55
    * - Trong khoảng giữa của trục số: score=<=5.2OR>8.2
    */
+  @Field(() => String)
   @IsOptional()
   @Transform(({ value }) => {
     //Nếu không khớp định dạng, trả về null
@@ -56,12 +59,19 @@ export class SearchStudentDto extends PaginationDto {
     else if (values[1]) return [values[1], values[2]];
     return values[0];
   })
-  readonly score?: Expression;
+  readonly score?: SearchExpression;
 
-  @IsEnum({
-    NORMAL: 'NORMAL',
-    AVG: 'AVG',
-  })
+  @IsEnum(SearchStudentMode)
   @IsOptional()
-  readonly mode?: 'NORMAL' | 'AVG' = 'NORMAL';
+  readonly mode?: SearchStudentMode = SearchStudentMode.NORMAL;
+}
+
+@ObjectType()
+export class SearchStudentResult {
+  title: string;
+
+  result: Student[];
+
+  @Field(() => Int)
+  page: number;
 }

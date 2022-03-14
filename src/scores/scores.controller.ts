@@ -17,132 +17,150 @@ import {
 } from '../modules/http-exception.mapper';
 import { Student } from '../students/student.entity';
 import { SubjectsService } from '../subjects/subjects.service';
+import { MongoId } from '../types/union/mongo-id.union';
 import {
   CreateScoreDto,
   DeleteScoreDto,
   SearchScoreDto,
   UpdateScoreDto,
 } from './dto';
-import { Score } from './score.entity';
+import { Score, ScoreDocument } from './score.entity';
 import { ScoresService } from './scores.service';
 
 @Controller('scores')
 export class ScoresController {
   constructor(
-    private readonly scoresService: ScoresService,
-    private readonly subjectsService: SubjectsService,
-    private readonly studentsService: StudentsService,
-    private readonly emailService: EmailService,
-    private readonly excelService: ExcelService,
+    readonly _scoresService: ScoresService,
+    readonly _subjectsService: SubjectsService,
+    readonly _studentsService: StudentsService,
+    readonly _emailService: EmailService,
+    readonly _excelService: ExcelService,
   ) {}
 
   @Post()
   async create(@Body() createScoreDto: CreateScoreDto) {
-    const isStudentExist = await this.studentsService.checkExist({
+    const isStudentExist = await this._studentsService.checkExist({
       _id: createScoreDto.student,
     });
-    const isSubjectExist = await this.subjectsService.checkExist({
+    const isSubjectExist = await this._subjectsService.checkExist({
       _id: createScoreDto.subject,
     });
 
     if (!isStudentExist || !isSubjectExist)
       HttpExceptionMapper.throw(DatabaseExceptions.REFERENCE_OBJ_NOT_EXIST);
 
-    return this.scoresService.create(createScoreDto).then(async (value) => {
-      //Thực thi đồng thời truy vấn Score vừa tạo và đọc file xlsx schema
-      const [score, schema, schemaAll, countSubjects] = await Promise.all([
-        this.scoresService.search({
-          insertedId: value[0]._id,
-          populates: [
-            {
-              path: 'student',
-              populate: {
-                path: 'scores',
-                populate: {
-                  path: 'subject',
-                },
-              },
-            },
-            { path: 'subject', model: 'Subject' },
-          ],
-        }),
-        readFile('./xlsx-template/attch-email.xlsx'),
-        readFile('./xlsx-template/attch-all-scores-email.xlsx'),
-        this.subjectsService.countSubjects(),
-      ]);
-
-      //Đổ dữ liệu vào schema để tạo tệp kết quả xlsx
-      const content = [
-        await this.excelService.create<Score>({
-          schema,
-          data: score,
-        }),
-      ];
-
-      //Nếu tất cả các môn đều có điểm
-      if (countSubjects === score.student.scores.length) {
-        content.push(
-          await this.excelService.create<Student>({
-            schema: schemaAll,
-            data: score.student,
-          }),
-        );
-      }
-
-      //Gửi email
-      this.emailService.sendWhenScoreAdded({
-        score,
-        content,
-      });
-
-      return value;
-    });
+    return this._scoresService
+      .create(createScoreDto)
+      .then(this._afterInsertScore);
   }
 
   @Patch()
   async update(@Body() updateScoreDto: UpdateScoreDto) {
-    const isStudentNotExist =
-      updateScoreDto.student &&
-      !(await this.studentsService.checkExist({
-        _id: updateScoreDto.student,
-      }));
-    const isSubjectNotExist =
-      updateScoreDto.subject &&
-      !(await this.subjectsService.checkExist({
-        _id: updateScoreDto.subject,
-      }));
+    let isStudentExist = true;
+    let isSubjectExist = true;
 
-    if (isStudentNotExist || isSubjectNotExist)
+    if (updateScoreDto.student)
+      isStudentExist = await this._studentsService.checkExist({
+        _id: updateScoreDto.student,
+      });
+
+    if (updateScoreDto.subject)
+      isSubjectExist = await this._subjectsService.checkExist({
+        _id: updateScoreDto.subject,
+      });
+
+    if (!isStudentExist || !isSubjectExist)
       HttpExceptionMapper.throw(DatabaseExceptions.REFERENCE_OBJ_NOT_EXIST);
 
-    return this.scoresService.update(updateScoreDto);
+    return this._scoresService.update(updateScoreDto);
   }
 
   @Delete()
   async delete(@Body() deleteScoreDto: DeleteScoreDto) {
-    const isStudentExist =
-      deleteScoreDto.student &&
-      (await this.studentsService.checkExist({
+    let isStudentExist = false;
+    let isSubjectExist = false;
+
+    if (deleteScoreDto.student)
+      isStudentExist = await this._studentsService.checkExist({
         _id: deleteScoreDto.student,
-      }));
-    const isSubjectExist =
-      deleteScoreDto.subject &&
-      (await this.subjectsService.checkExist({
+      });
+
+    if (deleteScoreDto.subject)
+      isSubjectExist = await this._subjectsService.checkExist({
         _id: deleteScoreDto.subject,
-      }));
+      });
 
     if (isStudentExist || isSubjectExist)
       HttpExceptionMapper.throw(DatabaseExceptions.OBJ_REFERENCED);
 
-    return this.scoresService.delete(deleteScoreDto);
+    return this._scoresService.delete(deleteScoreDto);
   }
 
   @Get()
   async search(@Query() searchScoreDto: SearchScoreDto) {
-    const result = await this.scoresService.search({
-      ...searchScoreDto,
+    return this._scoresService.search(searchScoreDto);
+  }
+
+  async _afterInsertScore(insertedScore: (ScoreDocument & { _id: MongoId })[]) {
+    const searchScore = this._scoresService.search({
+      insertedId: insertedScore[0]._id,
+      populates: [
+        {
+          path: 'student',
+          populate: {
+            path: 'scores',
+            populate: {
+              path: 'subject',
+            },
+          },
+        },
+        { path: 'subject', model: 'Subject' },
+      ],
     });
-    console.log(result.student.scores);
-    return result;
+    const readMailSchema = readFile('./xlsx-template/attch-email.xlsx');
+    const readMailAllScoresSchema = readFile(
+      './xlsx-template/attch-all-scores-email.xlsx',
+    );
+    const countSubjects = this._subjectsService.countSubjects();
+
+    //Thực thi đồng thời truy vấn Score vừa tạo và đọc file xlsx schema
+    const [scoreResult, schema, schemaAll, numberOfSubjects] =
+      await Promise.all([
+        searchScore,
+        readMailSchema,
+        readMailAllScoresSchema,
+        countSubjects,
+      ]);
+
+    let score: Score;
+
+    if (Array.isArray(scoreResult)) score = scoreResult[0];
+    else score = scoreResult;
+
+    const excelScore = await this._excelService.create<Score>({
+      schema,
+      data: score,
+    });
+
+    //Đổ dữ liệu vào schema để tạo tệp kết quả xlsx
+    const content = [excelScore];
+
+    //Nếu tất cả các môn đều có điểm
+    if (numberOfSubjects === score.student.scores.length) {
+      const excelAllScores = await this._excelService.create<Student>({
+        schema: schemaAll,
+        data: score.student,
+      });
+
+      content.push(excelAllScores);
+    }
+
+    //Gửi email
+    this._emailService.sendWhenScoreAdded({
+      score,
+      content,
+    });
+
+    return insertedScore;
   }
 }

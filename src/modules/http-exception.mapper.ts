@@ -1,4 +1,5 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
+
 export class HttpExceptionMapper {
   static throw(databaseException: DatabaseExceptions) {
     switch (databaseException) {

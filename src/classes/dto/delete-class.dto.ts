@@ -1,10 +1,10 @@
-import { ArgsType, Field } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 import { IsMongoId } from 'class-validator';
-import mongoose from 'mongoose';
+import { MongoId } from 'src/types/union/mongo-id.union';
 
-@ArgsType()
+@InputType()
 export class DeleteClassDto {
   @Field(() => String)
   @IsMongoId()
-  readonly _id: string | mongoose.Types.ObjectId;
+  readonly _id: MongoId;
 }

@@ -1,16 +1,17 @@
 import { ArgsType, Field } from '@nestjs/graphql';
 import { Transform } from 'class-transformer';
 import { IsEnum, IsMongoId, IsOptional, Length } from 'class-validator';
-import mongoose from 'mongoose';
 import { PaginationDto } from 'src/modules/pagination.dto';
-import { Expression } from '../../modules/expression.collection';
+import { MongoId } from 'src/types/union/mongo-id.union';
+import { SearchExpression } from 'src/types/union/search-expression.union';
+import { SearchBitwises } from '../../types/enum/search-bitwises.enum';
 
 @ArgsType()
 export class SearchClassDto extends PaginationDto {
   @Field(() => String)
   @IsMongoId()
   @IsOptional()
-  readonly _id?: string | mongoose.Types.ObjectId;
+  readonly _id?: MongoId;
 
   @Length(1, 60)
   @IsOptional()
@@ -33,17 +34,13 @@ export class SearchClassDto extends PaginationDto {
     else if (values[1]) return [values[1], values[2]];
     else return values[0];
   })
-  readonly totalMember?: Expression;
+  readonly totalMember?: SearchExpression;
 
   @Length(1, 60)
   @IsOptional()
   readonly teacherName?: string;
 
-  @Field(() => String)
-  @IsEnum({
-    AND: 'AND',
-    OR: 'OR',
-  })
+  @IsEnum(SearchBitwises)
   @IsOptional()
-  readonly operator: 'AND' | 'OR';
+  readonly operator?: SearchBitwises = SearchBitwises.AND;
 }

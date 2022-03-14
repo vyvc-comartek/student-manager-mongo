@@ -3,10 +3,35 @@
 # ------------------------------------------------------
 
 type Class {
+  _id: String!
   name: String!
   students: [Student!]!
   teacherName: String!
   totalMember: Int!
+}
+
+input CreateClassDto {
+  name: String!
+  teacherName: String!
+}
+
+input CreateScoreDto {
+  score: Float!
+  studentId: String!
+  subjectId: String!
+}
+
+input CreateStudentDto {
+  classId: String!
+  dob: DateTime!
+  email: String!
+  gender: Genders = MALE
+  name: String!
+}
+
+input CreateSubjectDto {
+  name: String!
+  type: SubjectTypes!
 }
 
 """
@@ -14,27 +39,122 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+input DeleteClassDto {
+  _id: String!
+}
+
+input DeleteScoreDto {
+  _id: String
+  studentId: String
+  subjectId: String
+}
+
+input DeleteStudentDto {
+  _id: String!
+}
+
+input DeleteSubjectDto {
+  _id: String
+  name: String
+}
+
+enum Genders {
+  FEMALE
+  MALE
+  OTHER
+}
+
+type Mutation {
+  createClass(create: CreateClassDto!): [Class!]!
+  createScore(create: CreateScoreDto!): [Score!]!
+  createStudent(create: CreateStudentDto!): [Student!]!
+  createSubject(create: CreateSubjectDto!): [Subject!]!
+  deleteClass(delete: DeleteClassDto!): Class!
+  deleteScore(delete: DeleteScoreDto!): Score!
+  deleteStudent(delete: DeleteStudentDto!): Student!
+  deleteSubject(delete: DeleteSubjectDto!): Subject!
+  updateClass(update: UpdateClassDto!): Class!
+  updateScore(update: UpdateScoreDto!): Score!
+  updateStudent(update: UpdateStudentDto!): Student!
+  updateSubject(update: UpdateSubjectDto!): Subject!
+}
+
 type Query {
-  classes(_id: String, name: String, operator: String!, teacherName: String, totalMember: String): [Class!]!
+  searchClass(_id: String, name: String, operator: SearchBitwises = AND, teacherName: String, totalMember: String): [Class!]!
+  searchScore(_id: String, score: String, studentId: String, subjectId: String): [Score!]!
+  searchStudent(_id: String, classId: String, mode: SearchStudentMode = NORMAL, name: String, score: String): SearchStudentResult!
+  searchSubject(_id: String, name: String, type: SubjectTypes): [Subject!]!
 }
 
 type Score {
+  _id: String!
   score: Float!
   student: Student!
   subject: Subject!
 }
 
+enum SearchBitwises {
+  AND
+  OR
+}
+
+enum SearchStudentMode {
+  AVG
+  NORMAL
+}
+
+type SearchStudentResult {
+  page: Int!
+  result: [Student!]!
+  title: String!
+}
+
 type Student {
+  _id: String!
   class: Class!
   dob: DateTime!
   email: String!
-  gender: String!
+  gender: Genders!
   name: String!
   scoreAvg: Int!
   scores: [Score!]!
 }
 
 type Subject {
+  _id: String!
   name: String!
-  type: String!
+  type: SubjectTypes!
+}
+
+enum SubjectTypes {
+  OFFLINE
+  ONLINE
+}
+
+input UpdateClassDto {
+  _id: String!
+  name: String
+  teacherName: String
+}
+
+input UpdateScoreDto {
+  _id: String
+  score: Float!
+  studentId: String
+  subjectId: String
+}
+
+input UpdateStudentDto {
+  _id: String!
+  classId: String
+  dob: DateTime
+  email: String
+  gender: Genders
+  name: String
+}
+
+input UpdateSubjectDto {
+  _id: String
+  name: String
+  type: SubjectTypes
 }

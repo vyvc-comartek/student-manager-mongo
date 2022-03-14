@@ -1,19 +1,19 @@
-import { ArgsType, Field, Float } from '@nestjs/graphql';
+import { Field, Float, InputType } from '@nestjs/graphql';
 import { Expose, Type } from 'class-transformer';
 import { IsMongoId, Max, Min } from 'class-validator';
-import mongoose from 'mongoose';
+import { MongoId } from '../../types/union/mongo-id.union';
 
-@ArgsType()
+@InputType()
 export class CreateScoreDto {
-  @Field(() => String)
+  @Field(() => String, { name: 'studentId' })
   @Expose({ name: 'studentId' })
   @IsMongoId()
-  readonly student: string | mongoose.Types.ObjectId;
+  readonly student: MongoId;
 
-  @Field(() => String)
+  @Field(() => String, { name: 'subjectId' })
   @Expose({ name: 'subjectId' })
   @IsMongoId()
-  readonly subject: string | mongoose.Types.ObjectId;
+  readonly subject: MongoId;
 
   @Field(() => Float)
   @Min(1)

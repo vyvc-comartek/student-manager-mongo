@@ -5,6 +5,8 @@ import { ObjectId } from 'mongodb';
 @Injectable()
 export class ToObjectId implements PipeTransform {
   transform(value: object, metadata: ArgumentMetadata) {
+    if (!value) return value;
+
     let changed = {};
     const keys = Object.keys(value);
 

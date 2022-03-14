@@ -1,7 +1,7 @@
-import { ArgsType } from '@nestjs/graphql';
+import { InputType } from '@nestjs/graphql';
 import { Length } from 'class-validator';
 
-@ArgsType()
+@InputType()
 export class CreateClassDto {
   @Length(3, 60)
   readonly name: string;

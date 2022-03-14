@@ -1,16 +1,17 @@
 import { ArgsType, Field } from '@nestjs/graphql';
 import { IsMongoId, IsOptional } from 'class-validator';
 import mongoose from 'mongoose';
+import { MongoId } from '../../types/union/mongo-id.union';
 
 @ArgsType()
 export class CheckExistStudentDto {
   @Field(() => String)
   @IsMongoId()
   @IsOptional()
-  readonly class?: string | mongoose.Types.ObjectId;
+  readonly class?: MongoId;
 
   @Field(() => String)
   @IsMongoId()
   @IsOptional()
-  readonly _id?: string | mongoose.Types.ObjectId;
+  readonly _id?: MongoId;
 }

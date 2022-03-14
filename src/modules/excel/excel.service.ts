@@ -10,6 +10,8 @@ export class ExcelService {
     this._template.loadTemplate(schema);
     this._template.substitute(1, data);
 
-    return Buffer.from(this._template.generate('base64'), 'base64');
+    const dataBase64 = this._template.generate('base64');
+
+    return Buffer.from(dataBase64, 'base64');
   }
 }

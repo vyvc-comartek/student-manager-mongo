@@ -1,17 +1,27 @@
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { TransportType } from '@nestjs-modules/mailer/dist/interfaces/mailer-options.interface';
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { ApolloDriver } from '@nestjs/apollo';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { Class } from './classes/class.entity';
 import { ClassModule } from './classes/classes.module';
+import { ClassesService } from './classes/classes.service';
+import { createLoader } from './modules/entities.loader';
+import { Score } from './scores/score.entity';
 import { ScoreModule } from './scores/scores.module';
+import { ScoresService } from './scores/scores.service';
+import { SearchStudentResult } from './students/dto';
+import { Student } from './students/student.entity';
 import { StudentModule } from './students/students.module';
+import { StudentsService } from './students/students.service';
+import { Subject } from './subjects/subject.entity';
 import { SubjectModule } from './subjects/subjects.module';
+import { SubjectsService } from './subjects/subjects.service';
 
 @Module({
   imports: [
@@ -29,12 +39,33 @@ import { SubjectModule } from './subjects/subjects.module';
       }),
     }),
 
-    GraphQLModule.forRoot<ApolloDriverConfig>({
+    GraphQLModule.forRootAsync({
       driver: ApolloDriver,
-      autoSchemaFile: 'schema.gql',
-      installSubscriptionHandlers: true,
-      sortSchema: true,
-      debug: true,
+      imports: [ClassModule, ScoreModule, StudentModule, SubjectModule],
+      inject: [ClassesService, ScoresService, StudentsService, SubjectsService],
+
+      useFactory: (
+        classesService: ClassesService,
+        scoresService: ScoresService,
+        studentsService: StudentsService,
+        subjectsService: SubjectsService,
+      ) => ({
+        debug: true,
+        sortSchema: true,
+        installSubscriptionHandlers: true,
+        autoSchemaFile: 'schema.gql',
+
+        context: {
+          studentsLoaderByClass: createLoader<SearchStudentResult>(
+            studentsService,
+            'class',
+          ),
+          subjectsLoaderById: createLoader<Subject>(subjectsService),
+          studentsLoaderById: createLoader<Student>(studentsService),
+          classesLoaderById: createLoader<Class>(classesService),
+          scoresLoaderByStudent: createLoader<Score>(scoresService, 'student'),
+        },
+      }),
     }),
 
     MailerModule.forRootAsync({

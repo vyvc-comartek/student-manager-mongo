@@ -23,23 +23,23 @@ import {
 @Controller('classes')
 export class ClassesController {
   constructor(
-    private readonly classesService: ClassesService,
-    private readonly studentsService: StudentsService,
+    readonly _classesService: ClassesService,
+    readonly _studentsService: StudentsService,
   ) {}
 
   @Post()
   async create(@Body() createClassDto: CreateClassDto) {
-    return this.classesService.create(createClassDto);
+    return this._classesService.create(createClassDto);
   }
 
   @Patch()
   async update(@Body() updateClassDto: UpdateClassDto) {
-    return this.classesService.update(updateClassDto);
+    return this._classesService.update(updateClassDto);
   }
 
   @Delete()
   async delete(@Body() deleteClassDto: DeleteClassDto) {
-    const isStudentRefClass = await this.studentsService.checkExist({
+    const isStudentRefClass = await this._studentsService.checkExist({
       class: deleteClassDto._id,
     });
 
@@ -47,11 +47,11 @@ export class ClassesController {
     if (isStudentRefClass)
       HttpExceptionMapper.throw(DatabaseExceptions.OBJ_REFERENCED);
 
-    return this.classesService.delete(deleteClassDto);
+    return this._classesService.delete(deleteClassDto);
   }
 
   @Get()
   async search(@Query() searchClassDto: SearchClassDto) {
-    return this.classesService.search(searchClassDto);
+    return this._classesService.search(searchClassDto);
   }
 }

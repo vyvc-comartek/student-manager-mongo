@@ -3,6 +3,8 @@ import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
 @Injectable()
 export class RemoveFalseyPipe implements PipeTransform {
   transform(value: object, metadata: ArgumentMetadata) {
+    if (!value) return value;
+
     const keys = Object.keys(value);
 
     for (let i = keys.length - 1; i >= 0; i--) {

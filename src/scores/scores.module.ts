@@ -11,6 +11,7 @@ import { ExcelModule } from '../modules/excel/excel.module';
 import { StudentModule } from '../students/students.module';
 import { Score, ScoreSchema } from './score.entity';
 import { ScoresController } from './scores.controller';
+import { ScoresResolver } from './scores.resolver';
 import { ScoresService } from './scores.service';
 
 @Module({
@@ -21,9 +22,9 @@ import { ScoresService } from './scores.service';
     forwardRef(() => EmailModule),
     forwardRef(() => ExcelModule),
   ],
-  providers: [ScoresService],
+  providers: [ScoresService, ScoresResolver],
   controllers: [ScoresController],
-  exports: [ScoresService],
+  exports: [ScoresService, ScoresResolver],
 })
 export class ScoreModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

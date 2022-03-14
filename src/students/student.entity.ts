@@ -1,9 +1,11 @@
-import { Field, ObjectType, Int } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Type } from 'class-transformer';
 import mongoose from 'mongoose';
+import { Genders } from 'src/types/enum/gender.enum';
 import { Class } from '../classes/class.entity';
 import { Score } from '../scores/score.entity';
+import { MongoId } from '../types/union/mongo-id.union';
 
 @ObjectType()
 @Schema({
@@ -14,19 +16,21 @@ import { Score } from '../scores/score.entity';
   selectPopulatedPaths: true,
 })
 export class Student {
+  @Field(() => String)
+  _id: MongoId;
+
   @Prop({ type: String, required: true, maxLength: 60 })
   name: string;
 
   @Prop({ type: Date, required: true })
   dob: Date;
 
-  @Field(() => String)
   @Prop({
     type: String,
-    enum: { values: ['Male', 'Female', 'Other'] },
-    default: 'Male',
+    enum: { values: Object.values(Genders) },
+    default: Genders.MALE,
   })
-  gender: 'Male' | 'Female' | 'Other';
+  gender: Genders = Genders.MALE;
 
   @Prop({ type: String, required: true, maxLength: 128 })
   email: string;

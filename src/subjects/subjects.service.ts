@@ -23,27 +23,40 @@ export class SubjectsService {
 
   async update({ _id, name, type }: UpdateSubjectDto) {
     if (_id && name)
-      return this.subjectModel.updateOne({ _id }, { name, type }).exec();
+      return this.subjectModel
+        .updateOne({ _id }, { name, type }, { new: true })
+        .lean()
+        .exec();
 
     if (_id && !name)
-      return this.subjectModel.updateOne({ _id }, { type }).exec();
+      return this.subjectModel
+        .updateOne({ _id }, { type }, { new: true })
+        .lean()
+        .exec();
 
-    return this.subjectModel.updateOne({ name }, { type }).exec();
+    return this.subjectModel
+      .updateOne({ name }, { type }, { new: true })
+      .lean()
+      .exec();
   }
 
   async delete({ _id, name }: DeleteSubjectDto) {
-    return this.subjectModel.deleteOne(_id ? { _id } : { name }).exec();
+    const condition = _id ? { _id } : { name };
+
+    return this.subjectModel.deleteOne(condition).lean().exec();
   }
 
   async search(searchSubjectDto: SearchSubjectDto) {
-    return this.subjectModel.findOne(searchSubjectDto).exec();
+    return this.subjectModel.find(searchSubjectDto).lean().exec();
   }
 
   async checkExist(checkExistSubject: CheckExistSubjectDto) {
-    return Boolean(await this.subjectModel.findOne(checkExistSubject).exec());
+    return Boolean(
+      await this.subjectModel.findOne(checkExistSubject).lean().exec(),
+    );
   }
 
   async countSubjects() {
-    return this.subjectModel.count().exec();
+    return this.subjectModel.count().lean().exec();
   }
 }

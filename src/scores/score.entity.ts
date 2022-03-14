@@ -4,6 +4,7 @@ import { Type } from 'class-transformer';
 import mongoose from 'mongoose';
 import { Student } from '../students/student.entity';
 import { Subject } from '../subjects/subject.entity';
+import { MongoId } from '../types/union/mongo-id.union';
 
 @ObjectType()
 @Schema({
@@ -14,6 +15,9 @@ import { Subject } from '../subjects/subject.entity';
   selectPopulatedPaths: true,
 })
 export class Score {
+  @Field(() => String)
+  _id: MongoId;
+
   @Field(() => Float)
   @Prop({
     type: Number,

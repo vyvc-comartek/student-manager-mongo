@@ -23,34 +23,38 @@ import { SubjectsService } from './subjects.service';
 @Controller('subjects')
 export class SubjectsController {
   constructor(
-    private readonly subjectsService: SubjectsService,
-    private readonly scoresService: ScoresService,
+    readonly _subjectsService: SubjectsService,
+    readonly _scoresService: ScoresService,
   ) {}
 
   @Post()
   async create(@Body() createSubjectDto: CreateSubjectDto) {
-    return this.subjectsService.create(createSubjectDto);
+    return this._subjectsService.create(createSubjectDto);
   }
 
   @Patch()
   async update(@Body() updateSubjectDto: UpdateSubjectDto) {
-    return this.subjectsService.update(updateSubjectDto);
+    return this._subjectsService.update(updateSubjectDto);
   }
 
   @Delete()
   async delete(@Body() deleteSubjectDto: DeleteSubjectDto) {
-    const isScoreExist =
-      deleteSubjectDto._id &&
-      (await this.scoresService.checkExist({ subject: deleteSubjectDto._id }));
+    let isScoreExist = false;
+
+    if (deleteSubjectDto._id) {
+      isScoreExist = await this._scoresService.checkExist({
+        subject: deleteSubjectDto._id,
+      });
+    }
 
     if (isScoreExist)
       HttpExceptionMapper.throw(DatabaseExceptions.OBJ_REFERENCED);
 
-    return this.subjectsService.delete(deleteSubjectDto);
+    return this._subjectsService.delete(deleteSubjectDto);
   }
 
   @Get()
   async search(@Query() searchSubjectDto: SearchSubjectDto) {
-    return this.subjectsService.search(searchSubjectDto);
+    return this._subjectsService.search(searchSubjectDto);
   }
 }

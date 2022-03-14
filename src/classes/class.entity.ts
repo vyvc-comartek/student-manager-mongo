@@ -3,6 +3,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Type } from 'class-transformer';
 import { Document } from 'mongodb';
 import { Student } from '../students/student.entity';
+import { MongoId } from '../types/union/mongo-id.union';
 
 @ObjectType()
 @Schema({
@@ -13,10 +14,13 @@ import { Student } from '../students/student.entity';
   selectPopulatedPaths: true,
 })
 export class Class {
+  @Field(() => String)
+  _id: MongoId;
+
   @Prop({ type: String, required: true, maxlength: 60 })
   name: string;
 
-  @Field(() => Int)
+  @Field(() => Int, { defaultValue: 0 })
   @Prop({ type: Number, required: true, default: 0 })
   totalMember: number;
 
