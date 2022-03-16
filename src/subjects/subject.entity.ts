@@ -1,10 +1,16 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, HideField, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { SubjectTypes } from 'src/types/enum/subject-types.enum';
 import { MongoId } from '../types/union/mongo-id.union';
 
 @ObjectType()
-@Schema({ timestamps: true, id: true })
+@Schema({
+  timestamps: true,
+  id: true,
+  toObject: { virtuals: true },
+  toJSON: { virtuals: true },
+  selectPopulatedPaths: true,
+})
 export class Subject {
   @Field(() => String)
   _id: MongoId;
@@ -22,4 +28,6 @@ export class Subject {
 
 export type SubjectDocument = Subject & Document;
 
-export const SubjectSchema = SchemaFactory.createForClass(Subject);
+const SubjectSchema = SchemaFactory.createForClass(Subject);
+
+export { SubjectSchema };

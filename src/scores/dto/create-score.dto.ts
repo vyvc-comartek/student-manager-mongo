@@ -1,6 +1,13 @@
 import { Field, Float, InputType } from '@nestjs/graphql';
 import { Expose, Type } from 'class-transformer';
-import { IsMongoId, Max, Min } from 'class-validator';
+import {
+  IsBoolean,
+  IsDate,
+  IsMongoId,
+  IsOptional,
+  Max,
+  Min,
+} from 'class-validator';
 import { MongoId } from '../../types/union/mongo-id.union';
 
 @InputType()
@@ -14,6 +21,16 @@ export class CreateScoreDto {
   @Expose({ name: 'subjectId' })
   @IsMongoId()
   readonly subject: MongoId;
+
+  @IsDate()
+  @IsOptional()
+  @Type(() => Date)
+  readonly dateToSendMail?: Date;
+
+  @IsBoolean()
+  @IsOptional()
+  @Type(() => Boolean)
+  readonly hourToSendMail?: boolean;
 
   @Field(() => Float)
   @Min(1)

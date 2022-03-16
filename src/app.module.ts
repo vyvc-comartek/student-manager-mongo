@@ -2,6 +2,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { TransportType } from '@nestjs-modules/mailer/dist/interfaces/mailer-options.interface';
 import { ApolloDriver } from '@nestjs/apollo';
+import { BullModule } from '@nestjs/bull';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -36,6 +37,15 @@ import { SubjectsService } from './subjects/subjects.service';
         ssl: true,
         useUnifiedTopology: true,
         useNewUrlParser: true,
+      }),
+    }),
+
+    BullModule.forRootAsync({
+      useFactory: async () => ({
+        redis: {
+          host: 'localhost',
+          port: 6379,
+        },
       }),
     }),
 
