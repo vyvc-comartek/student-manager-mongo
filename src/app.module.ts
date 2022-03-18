@@ -9,6 +9,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { BullBoardModule } from './bull-board/bull-board.module';
 import { Class } from './classes/class.entity';
 import { ClassModule } from './classes/classes.module';
 import { ClassesService } from './classes/classes.service';
@@ -106,6 +107,8 @@ import { SubjectsService } from './subjects/subjects.service';
         },
       }),
     }),
+
+    BullBoardModule,
 
     ClassModule,
     ScoreModule,

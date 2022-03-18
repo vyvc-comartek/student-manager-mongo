@@ -10,7 +10,7 @@ import { EmailService } from './email.service';
     }),
   ],
   providers: [EmailService, EmailConsumer],
-  exports: [EmailService],
+  exports: [EmailService, EmailConsumer],
 })
 export class EmailModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
