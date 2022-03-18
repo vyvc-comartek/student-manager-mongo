@@ -16,6 +16,8 @@ input CreateClassDto {
 }
 
 input CreateScoreDto {
+  dateToSendMail: DateTime
+  hourToSendMail: Boolean
   score: Float!
   studentId: String!
   subjectId: String!

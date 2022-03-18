@@ -1,4 +1,4 @@
-import { Field, Float, ObjectType } from '@nestjs/graphql';
+import { Field, Float, HideField, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Type } from 'class-transformer';
 import mongoose from 'mongoose';
@@ -42,4 +42,6 @@ export class Score {
 
 export type ScoreDocument = Score & Document;
 
-export const ScoreSchema = SchemaFactory.createForClass(Score);
+const ScoreSchema = SchemaFactory.createForClass(Score);
+
+export { ScoreSchema };

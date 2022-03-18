@@ -7,6 +7,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import Bull from 'bull';
 import { readFile } from 'fs/promises';
 import { StudentsService } from 'src/students/students.service';
 import { EmailService } from '../modules/email/email.service';
@@ -38,7 +39,10 @@ export class ScoresController {
   ) {}
 
   @Post()
-  async create(@Body() createScoreDto: CreateScoreDto) {
+  async create(
+    @Body()
+    { dateToSendMail, hourToSendMail, ...createScoreDto }: CreateScoreDto,
+  ) {
     const isStudentExist = await this._studentsService.checkExist({
       _id: createScoreDto.student,
     });
@@ -51,7 +55,9 @@ export class ScoresController {
 
     return this._scoresService
       .create(createScoreDto)
-      .then(this._afterInsertScore);
+      .then((insertedScore) =>
+        this._afterInsertScore(insertedScore, dateToSendMail, hourToSendMail),
+      );
   }
 
   @Patch()
@@ -101,7 +107,11 @@ export class ScoresController {
     return this._scoresService.search(searchScoreDto);
   }
 
-  async _afterInsertScore(insertedScore: (ScoreDocument & { _id: MongoId })[]) {
+  async _afterInsertScore(
+    insertedScore: (ScoreDocument & { _id: MongoId })[],
+    dateToSendMail: Date,
+    hourToSendMail: Boolean,
+  ) {
     const searchScore = this._scoresService.search({
       insertedId: insertedScore[0]._id,
       populates: [
@@ -134,15 +144,17 @@ export class ScoresController {
 
     let score: Score;
 
+    //Kết quả có thể là một mảng Score hoặc một Score
     if (Array.isArray(scoreResult)) score = scoreResult[0];
     else score = scoreResult;
 
+    //Tạo file excel
     const excelScore = await this._excelService.create<Score>({
       schema,
       data: score,
     });
 
-    //Đổ dữ liệu vào schema để tạo tệp kết quả xlsx
+    //Đổ dữ liệu vào schema
     const content = [excelScore];
 
     //Nếu tất cả các môn đều có điểm
@@ -155,10 +167,27 @@ export class ScoresController {
       content.push(excelAllScores);
     }
 
+    let jobOptions = {} as Bull.JobOptions;
+
+    if (dateToSendMail) {
+      jobOptions = {
+        ...jobOptions,
+        delay: dateToSendMail.getMilliseconds() - Date.now(),
+      };
+    }
+
+    if (hourToSendMail) {
+      jobOptions = {
+        ...jobOptions,
+        delay: 60 * 60 * 1000,
+      };
+    }
+
     //Gửi email
     this._emailService.sendWhenScoreAdded({
       score,
       content,
+      jobOptions,
     });
 
     return insertedScore;
