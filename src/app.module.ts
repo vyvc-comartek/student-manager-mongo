@@ -5,6 +5,7 @@ import { ApolloDriver } from '@nestjs/apollo';
 import { BullModule } from '@nestjs/bull';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
@@ -14,6 +15,7 @@ import { Class } from './classes/class.entity';
 import { ClassModule } from './classes/classes.module';
 import { ClassesService } from './classes/classes.service';
 import { createLoader } from './modules/entities.loader';
+import { GlobalMetricInterceptor } from './modules/pm2io/globalMetrics.interceptor';
 import { Score } from './scores/score.entity';
 import { ScoreModule } from './scores/scores.module';
 import { ScoresService } from './scores/scores.service';
@@ -117,7 +119,13 @@ import { SubjectsService } from './subjects/subjects.service';
   ],
 
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: GlobalMetricInterceptor,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {}
