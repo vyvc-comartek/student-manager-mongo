@@ -34,6 +34,7 @@
     "@nestjs/passport": "^8.2.1",
     "@nestjs/platform-express": "^8.4.1",
     "@nestjs/swagger": "^5.2.0",
+    "@pm2/io": "^5.0.0",
     "apollo-server-express": "^3.6.4",
     "bull": "^4.7.0",
     "class-transformer": "^0.5.1",

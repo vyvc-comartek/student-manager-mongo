@@ -17,6 +17,7 @@ specifiers:
   '@nestjs/schematics': ^8.0.8
   '@nestjs/swagger': ^5.2.0
   '@nestjs/testing': ^8.4.1
+  '@pm2/io': ^5.0.0
   '@types/bull': ^3.15.8
   '@types/express': ^4.17.13
   '@types/jest': 27.4.1
@@ -70,6 +71,7 @@ dependencies:
   '@nestjs/passport': 8.2.1_70d98f1edabaa889bf69e4387dc17f8c
   '@nestjs/platform-express': 8.4.1_214a294e539403889bf33d78c1f08a26
   '@nestjs/swagger': 5.2.0_38eca4536baffb2b57680ba96366df97
+  '@pm2/io': 5.0.0
   apollo-server-express: 3.6.4_graphql@16.3.0
   bull: 4.7.0
   class-transformer: 0.5.1
@@ -1315,6 +1317,54 @@ packages:
       - encoding
     dev: false
 
+  /@opencensus/core/0.0.8:
+    resolution: {integrity: sha512-yUFT59SFhGMYQgX0PhoTR0LBff2BEhPrD9io1jWfF/VDbakRfs6Pq60rjv0Z7iaTav5gQlttJCX2+VPxFWCuoQ==}
+    engines: {node: '>=6.0'}
+    dependencies:
+      continuation-local-storage: 3.2.1
+      log-driver: 1.2.7
+      semver: 5.7.1
+      shimmer: 1.2.1
+      uuid: 3.4.0
+    dev: false
+
+  /@opencensus/core/0.0.9:
+    resolution: {integrity: sha512-31Q4VWtbzXpVUd2m9JS6HEaPjlKvNMOiF7lWKNmXF84yUcgfAFL5re7/hjDmdyQbOp32oGc+RFV78jXIldVz6Q==}
+    engines: {node: '>=6.0'}
+    dependencies:
+      continuation-local-storage: 3.2.1
+      log-driver: 1.2.7
+      semver: 5.7.1
+      shimmer: 1.2.1
+      uuid: 3.4.0
+    dev: false
+
+  /@opencensus/propagation-b3/0.0.8:
+    resolution: {integrity: sha512-PffXX2AL8Sh0VHQ52jJC4u3T0H6wDK6N/4bg7xh4ngMYOIi13aR1kzVvX1sVDBgfGwDOkMbl4c54Xm3tlPx/+A==}
+    engines: {node: '>=6.0'}
+    dependencies:
+      '@opencensus/core': 0.0.8
+      uuid: 3.4.0
+    dev: false
+
+  /@pm2/io/5.0.0:
+    resolution: {integrity: sha512-3rToDVJaRoob5Lq8+7Q2TZFruoEkdORxwzFpZaqF4bmH6Bkd7kAbdPrI/z8X6k1Meq5rTtScM7MmDgppH6aLlw==}
+    engines: {node: '>=6.0'}
+    dependencies:
+      '@opencensus/core': 0.0.9
+      '@opencensus/propagation-b3': 0.0.8
+      async: 2.6.3
+      debug: 4.3.3
+      eventemitter2: 6.4.5
+      require-in-the-middle: 5.1.0
+      semver: 6.3.0
+      shimmer: 1.2.1
+      signal-exit: 3.0.7
+      tslib: 1.9.3
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
   /@protobufjs/aspromise/1.1.2:
     resolution: {integrity: sha1-m4sMxmPWaafY9vXQiToU00jzD78=}
     dev: false
@@ -2188,6 +2238,14 @@ packages:
       tslib: 2.3.1
     dev: false
 
+  /async-listener/0.6.10:
+    resolution: {integrity: sha512-gpuo6xOyF4D5DE5WvyqZdPA3NGhiT6Qf07l7DCB0wwDEsLvDIbCr6j9S5aj5Ch96dLace5tXVzWBZkxU/c5ohw==}
+    engines: {node: <=0.11.8 || >0.11.10}
+    dependencies:
+      semver: 5.7.1
+      shimmer: 1.2.1
+    dev: false
+
   /async-retry/1.3.3:
     resolution: {integrity: sha512-wfr/jstw9xNi/0teMHrRW7dsz3Lt5ARhYNZ2ewpadnhaIp5mbALhOAP+EAdsC7t4Z6wqsDVv9+W6gm1Dk9mEyw==}
     dependencies:
@@ -2196,6 +2254,12 @@ packages:
 
   /async/0.9.2:
     resolution: {integrity: sha1-rqdNXmHB+JlhO/ZL2mbUx48v0X0=}
+    dev: false
+
+  /async/2.6.3:
+    resolution: {integrity: sha512-zflvls11DCy+dQWzTW2dzuilv8Z5X/pjfmZOWba6TNIVDm+2UDaJmXSOXlasHKfNBs8oo3M0aT50fDEWfKZjXg==}
+    dependencies:
+      lodash: 4.17.21
     dev: false
 
   /asynckit/0.4.0:
@@ -2696,6 +2760,13 @@ packages:
     engines: {node: '>= 0.6'}
     dev: false
 
+  /continuation-local-storage/3.2.1:
+    resolution: {integrity: sha512-jx44cconVqkCEEyLSKWwkvUXwO561jXMa3LPjTPsm5QR22PA0/mhe33FT4Xb5y74JDvt/Cq+5lm8S8rskLv9ZA==}
+    dependencies:
+      async-listener: 0.6.10
+      emitter-listener: 1.1.2
+    dev: false
+
   /convert-source-map/1.8.0:
     resolution: {integrity: sha512-+OQdjP49zViI/6i7nIJpA8rAl4sV/JdPfU9nZs3VqOwGIgizICvuN2ru6fMd+4llL0tar18UYJXfZ/TWtmhUjA==}
     dependencies:
@@ -3056,6 +3127,12 @@ packages:
       sax: 0.3.5
     dev: false
 
+  /emitter-listener/1.1.2:
+    resolution: {integrity: sha512-Bt1sBAGFHY9DKY+4/2cV6izcKJUf5T7/gkdmkxzX/qv9CcGH8xSwVRW5mtX03SWJtRTWSOpzCuWN9rBFYZepZQ==}
+    dependencies:
+      shimmer: 1.2.1
+    dev: false
+
   /emittery/0.8.1:
     resolution: {integrity: sha512-uDfvUjVrfGJJhymx/kz6prltenw1u7WrCg1oa94zYY8xxVpLLUu045LAT0dhDZdXG58/EpPL/5kA180fQ/qudg==}
     engines: {node: '>=10'}
@@ -3305,6 +3382,10 @@ packages:
   /etag/1.8.1:
     resolution: {integrity: sha1-Qa4u62XvpiJorr/qg6x9eSmbCIc=}
     engines: {node: '>= 0.6'}
+    dev: false
+
+  /eventemitter2/6.4.5:
+    resolution: {integrity: sha512-bXE7Dyc1i6oQElDG0jMRZJrRAn9QR2xyyFGmBdZleNmyQX0FqGYmhZIrIrpPfm/w//LTo4tVQGOGQcGCb5q9uw==}
     dev: false
 
   /eventemitter3/3.1.2:
@@ -5041,6 +5122,11 @@ packages:
   /lodash/4.17.21:
     resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
 
+  /log-driver/1.2.7:
+    resolution: {integrity: sha512-U7KCmLdqsGHBLeWqYlFA0V0Sl6P08EE1ZrmA9cxjUE0WVqT9qnyVDPz1kzpFEP0jdJuFnasWIfSd7fsaNXkpbg==}
+    engines: {node: '>=0.8.6'}
+    dev: false
+
   /log-symbols/4.1.0:
     resolution: {integrity: sha512-8XPvpAA8uyhfteu8pIvQxpJZ7SYYdpUivZpGy6sFsBuKRY/7rQGavedeB8aK+Zkyq6upMFVL/9AW6vOYzfRyLg==}
     engines: {node: '>=10'}
@@ -5209,6 +5295,10 @@ packages:
     hasBin: true
     dependencies:
       minimist: 1.2.5
+    dev: false
+
+  /module-details-from-path/1.0.3:
+    resolution: {integrity: sha1-EUyUlnPiqKNenTV4hSeqN7Z52is=}
     dev: false
 
   /mongodb-connection-string-url/2.5.2:
@@ -6078,6 +6168,16 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: true
 
+  /require-in-the-middle/5.1.0:
+    resolution: {integrity: sha512-M2rLKVupQfJ5lf9OvqFGIT+9iVLnTmjgbOmpil12hiSQNn5zJTKGPoIisETNjfK+09vP3rpm1zJajmErpr2sEQ==}
+    dependencies:
+      debug: 4.3.3
+      module-details-from-path: 1.0.3
+      resolve: 1.22.0
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
   /resolve-cwd/3.0.0:
     resolution: {integrity: sha512-OrZaX2Mb+rJCpH/6CpSqt9xFVpN++x01XnN2ie9g6P5/3xelLAkXWVADpdz1IHD/KFfEXyE6V0U01OQ3UO2rEg==}
     engines: {node: '>=8'}
@@ -6212,10 +6312,14 @@ packages:
       parseley: 0.7.0
     dev: false
 
+  /semver/5.7.1:
+    resolution: {integrity: sha512-sauaDf/PZdVgrLTNYHRtpXa1iRiKcaebiKQ1BJdpQlWH2lCvexQdX55snPFyK7QzpudqbCI0qXFfOasHdyNDGQ==}
+    hasBin: true
+    dev: false
+
   /semver/6.3.0:
     resolution: {integrity: sha512-b39TBaTSfV6yBrapU89p5fKekE2m/NwnDocOVruQFS1/veMgdzuPcnOM34M6CwxW8jH/lxEa5rBoDeUwu5HHTw==}
     hasBin: true
-    dev: true
 
   /semver/7.3.5:
     resolution: {integrity: sha512-PoeGJYh8HK4BTO/a9Tf6ZG3veo/A7ZVsYrSA6J8ny9nb3B1VrpkuN+z9OE5wfE5p6H4LchYZsegiQgbJD94ZFQ==}
@@ -6293,6 +6397,10 @@ packages:
       rechoir: 0.6.2
     dev: true
 
+  /shimmer/1.2.1:
+    resolution: {integrity: sha512-sQTKC1Re/rM6XyFM6fIAGHRPVGvyXfgzIDvzoq608vM+jeyVD0Tu1E6Np0Kc2zAIFWIj963V2800iF/9LPieQw==}
+    dev: false
+
   /side-channel/1.0.4:
     resolution: {integrity: sha512-q5XPytqFEIKHkGdiMIrY10mvLRvnQh42/+GoBlFW3b2LXLE2xxJpZFdm94we0BaoV3RwJyGqg5wS7epxTv0Zvw==}
     dependencies:
@@ -6306,7 +6414,6 @@ packages:
 
   /signal-exit/3.0.7:
     resolution: {integrity: sha512-wnD2ZE+l+SPC/uoS0vXeE9L1+0wuaMqKlfz9AMUo38JsyLSBWSFcHR1Rri62LZc12vLr1gb3jl7iwQhgwpAbGQ==}
-    dev: true
 
   /sisteransi/1.0.5:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
@@ -6831,6 +6938,10 @@ packages:
     resolution: {integrity: sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==}
     dev: true
 
+  /tslib/1.9.3:
+    resolution: {integrity: sha512-4krF8scpejhaOgqzBEcGM7yDIEfi0/8+8zDRZhNZZ2kjmHJ4hv3zCbQWxoJGz1iw5U0Jl0nma13xzHXcncMavQ==}
+    dev: false
+
   /tslib/2.3.1:
     resolution: {integrity: sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==}
 
@@ -6934,6 +7045,12 @@ packages:
   /utils-merge/1.0.1:
     resolution: {integrity: sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=}
     engines: {node: '>= 0.4.0'}
+    dev: false
+
+  /uuid/3.4.0:
+    resolution: {integrity: sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==}
+    deprecated: Please upgrade  to version 7 or higher.  Older versions may use Math.random() in certain circumstances, which is known to be problematic.  See https://v8.dev/blog/math-random for details.
+    hasBin: true
     dev: false
 
   /uuid/8.3.2:
